@@ -24,7 +24,7 @@ class Page
   end
 
   def raw_body
-    @raw_body ||= File.read(@filename)
+    @raw_body ||= File.exists?(@filename) ? File.read(@filename) : ''
   end
 
   def body=(content)
