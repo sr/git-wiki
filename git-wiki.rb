@@ -10,13 +10,14 @@ unless File.exists?(GIT_DIR) && File.directory?(GIT_DIR)
   `git --git-dir #{GIT_DIR} init`
 end
 
+$repo = Grit::Repo.new(GIT_REPO)
+
 class Page
   attr_reader :name
 
   def initialize(name)
     @name = name
     @filename = File.join(GIT_REPO, @name)
-    @repo = Grit::Repo.new(GIT_REPO)
   end
 
   def body
@@ -34,13 +35,23 @@ class Page
   end
 
   def tracked?
-    return false if @repo.commits.empty?
-    @repo.commits.first.tree.contents.map { |b| b.name }.include?(@name)    
+    return false if $repo.commits.empty?
+    $repo.commits.first.tree.contents.map { |b| b.name }.include?(@name)    
+  end
+
+  def to_s
+    "<li><a href='/#{@name}'>#{@name}</a> (<a href='/e/#{@name}'>edit</a>)</li>"
   end
 end
 
 get '/' do
   redirect '/' + HOMEPAGE
+end
+
+get '/_list' do
+  @pages = $repo.commits.first.tree.contents.map { |blob| Page.new(blob.name) }
+  puts @pages.inspect
+  haml(list)
 end
 
 get '/:page' do
@@ -65,6 +76,8 @@ def layout(title, content)
   %head
     %title #{title}
   %body
+    %p
+      %a{:href => '/_list'} List
     #{content}
   )
 end
@@ -89,4 +102,14 @@ def edit
       %p
         %input{ :type => :submit, :value => 'save!' }
   ))
+end
+
+def list
+  layout('Listing pages', %q{
+    %h1 All pages
+    - if @pages.empty?
+      %p No page found :-(
+    - else
+      %ul= @pages.each(&:to_s)
+  })
 end
