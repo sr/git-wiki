@@ -1,6 +1,6 @@
 %w(rubygems sinatra grit maruku rubypants).each { |l| require l }
 
-GIT_REPO = '/home/simon/wiki'
+GIT_REPO = ENV['HOME'] + '/wiki'
 GIT_DIR  = File.join(GIT_REPO, '.git')
 HOMEPAGE = 'HelloWorld'
 
