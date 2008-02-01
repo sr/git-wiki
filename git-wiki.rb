@@ -100,8 +100,7 @@ def show
 end
 
 def stylesheet
-"
-body
+"body
   :font
     family: Helvetica, sans-serif
     size: 13px
@@ -122,9 +121,7 @@ h1
   a
     color: black
     font-size: 12px
-    font-weight: normal
-  )
-"
+    font-weight: normal"
 end
 
 def edit
