@@ -40,7 +40,7 @@ class Page
   end
 
   def to_s
-    "<li><a href='/#{@name}'>#{@name}</a> (<a href='/e/#{@name}'>edit</a>)</li>"
+    "<li><strong class='pname'><a href='/#{@name}'>#{@name}</a></strong> (<a href='/e/#{@name}'>edit</a>)</li>"
   end
 end
 
@@ -80,7 +80,7 @@ def layout(title, content)
 %html
   %head
     %title #{title}
-    %link{:rel => 'stylesheet', :href => '_stylesheet.css', :type => 'text/css', :media => 'screen'}
+    %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css', :media => 'screen'}
   %body
     #navigation
       %a{:href => '/'} Home
@@ -117,6 +117,15 @@ h1
   display: block
   border-bottom: 1px solid black
 
+a
+  color: black
+
+a:hover
+  text-decoration: none
+
+.pname
+  font-size: 14px
+
 .edit_link
   a
     color: black
@@ -134,6 +143,8 @@ def edit
         ="<textarea name ='body' rows='30' cols='120'>#{@page.raw_body}</textarea>"
       %p
         %input{ :type => :submit, :value => 'save!' }
+        &nbsp;
+        %a{ :href => 'javascript:history.back()' } do not want
   ))
 end
 
