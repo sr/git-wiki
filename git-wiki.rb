@@ -54,6 +54,11 @@ get '/_list' do
   haml(list)
 end
 
+get '/_stylesheet.css' do
+  css = Sass::Engine.new(stylesheet())
+  css.render
+end
+
 get '/:page' do
   @page = Page.new(params[:page])
   @page.tracked? ? haml(show) : redirect('/e/' + @page.name)
@@ -75,8 +80,10 @@ def layout(title, content)
 %html
   %head
     %title #{title}
+    %link{:rel => 'stylesheet', :href => '_stylesheet.css', :type => 'text/css', :media => 'screen'}
   %body
-    %p
+    #navigation
+      %a{:href => '/'} Home
       %a{:href => '/_list'} List
     #{content}
   )
@@ -84,11 +91,40 @@ end
 
 def show
   layout(@page.name, %q(
-    %h1= @page.name
-    %p
-      %a{:href => '/e/' + @page.name} Edit
+    %h1
+      = @page.name
+      %span.edit_link
+        %a{:href => '/e/' + @page.name} edit
     #page_content= @page.body
   ))
+end
+
+def stylesheet
+"
+body
+  :font
+    family: Helvetica, sans-serif
+    size: 13px
+
+#navigation
+  a
+    background-color: #e0e0e0
+    padding: 2px
+    color: black
+  a:hover
+    text-decoration: none
+
+h1
+  display: block
+  border-bottom: 1px solid black
+
+.edit_link
+  a
+    color: black
+    font-size: 12px
+    font-weight: normal
+  )
+"
 end
 
 def edit
