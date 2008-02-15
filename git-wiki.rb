@@ -40,23 +40,16 @@ class Page
   end
 
   def to_s
-    "<li><strong class='pname'><a href='/#{@name}'>#{@name}</a></strong> (<a href='/e/#{@name}'>edit</a>)</li>"
+    "<li><strong><a href='/#{@name}'>#{@name}</a></strong> — <a href='/e/#{@name}'>edit</a></li>"
   end
 end
 
-get '/' do
-  redirect '/' + HOMEPAGE
-end
+get('/') { redirect '/' + HOMEPAGE }
+get('/_stylesheet.css') { Sass::Engine.new(File.read(__FILE__).gsub(/.*__END__/m, '')).render }
 
 get '/_list' do
   @pages = $repo.commits.first.tree.contents.map { |blob| Page.new(blob.name) }
-  puts @pages.inspect
   haml(list)
-end
-
-get '/_stylesheet.css' do
-  css = Sass::Engine.new(stylesheet())
-  css.render
 end
 
 get '/:page' do
@@ -81,6 +74,8 @@ def layout(title, content)
   %head
     %title #{title}
     %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css', :media => 'screen'}
+    %meta{'http-equiv' => 'Content-Type', :content => 'text/html; charset=utf-8'}
+
   %body
     #navigation
       %a{:href => '/'} Home
@@ -91,60 +86,23 @@ end
 
 def show
   layout(@page.name, %q(
-    %h1
-      = @page.name
-      %span.edit_link
-        %a{:href => '/e/' + @page.name} edit
+      %a{:href => '/e/' + @page.name, :class => 'edit_link'} edit this page
+    %h1{:class => 'page_title'}= @page.name
     #page_content= @page.body
   ))
-end
-
-def stylesheet
-"body
-  :font
-    family: Helvetica, sans-serif
-    size: 13px
-
-#navigation
-  a
-    background-color: #e0e0e0
-    padding: 2px
-    color: black
-  a:hover
-    text-decoration: none
-
-h1
-  display: block
-  border-bottom: 1px solid black
-
-a
-  color: black
-
-a:hover
-  text-decoration: none
-
-.pname
-  font-size: 14px
-
-.edit_link
-  a
-    color: black
-    font-size: 12px
-    font-weight: normal"
 end
 
 def edit
   layout("Editing #{@page.name}", %q(
     %h1
       Editing
-      %a{:href => '/'+@page.name}= @page.name
+      = @page.name
+      %a{:href => 'javascript:history.back()', :class => 'cancel'} Cancel
     %form{ :method => 'POST', :action => '/e/' + params[:page]}
       %p
-        ="<textarea name ='body' rows='30' cols='120'>#{@page.raw_body}</textarea>"
+        ~"<textarea name='body' rows='25' cols='130'>#{@page.raw_body}</textarea>"
       %p
-        %input{ :type => :submit, :value => 'save!' }
-        &nbsp;
-        %a{ :href => 'javascript:history.back()' } do not want
+        %input{:type => :submit, :value => 'Save as the newest version', :class => :submit}
   ))
 end
 
@@ -157,3 +115,56 @@ def list
       %ul= @pages.each(&:to_s)
   })
 end
+
+__END__
+body
+  :font
+    family: Verdana, Arial, "Bitstream Vera Sans", Helvetica, sans-serif
+    size: 14px
+    color: black
+  line-height: 160%
+  background-color: white
+  margin: 2em
+
+#navigation
+  a
+    background-color: #e0e0e0
+    color: black
+    text-decoration: none
+    padding: 2px
+  padding: 5px
+  border-bottom: 1px black solid
+
+h1
+  display: block
+  padding-bottom: 5px
+
+a
+  color: black
+
+.submit
+  font-size: large
+  font-weight: bold
+
+.page_title
+  font-size: xx-large
+
+.edit_link
+  color: black
+  font-size: 14px
+  font-weight: bold
+  background-color: #e0e0e0
+  font-variant: small-caps
+  text-decoration: none
+
+.cancel
+  background-color: #e0e0e0
+  font-weight: normal
+  text-decoration: none
+  font-size: 14px 
+
+.cancel:before
+  content: "("
+
+.cancel:after
+  content: ")"
