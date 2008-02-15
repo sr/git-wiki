@@ -31,7 +31,7 @@ class Page
   def body=(content)
     File.open(@filename, 'w') { |f| f << content }
     message = tracked? ? "Edited #{@name}" : "Created #{@name}"
-    `cd #{GIT_REPO} && git add #{@name} && git commit -m #{message}`
+    `cd #{GIT_REPO} && git add #{@name} && git commit -m "#{message}"`
   end
 
   def tracked?
