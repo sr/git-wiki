@@ -1,8 +1,16 @@
-%w(rubygems sinatra grit maruku rubypants).each { |l| require l }
+#!/usr/bin/env ruby
+
+%w(rubygems sinatra grit maruku rubypants haml).each do |a_gem| 
+  begin
+    require a_gem
+  rescue LoadError => e
+    puts "You need to 'sudo gem install #{a_gem}' before we can proceed"
+  end
+end
 
 GIT_REPO = ENV['HOME'] + '/wiki'
 GIT_DIR  = File.join(GIT_REPO, '.git')
-HOMEPAGE = 'HelloWorld'
+HOMEPAGE = 'Home'
 
 unless File.exists?(GIT_DIR) && File.directory?(GIT_DIR)
   FileUtils.mkdir_p(GIT_DIR)
@@ -45,10 +53,15 @@ class Page
 end
 
 get('/') { redirect '/' + HOMEPAGE }
-get('/_stylesheet.css') { Sass::Engine.new(File.read(__FILE__).gsub(/.*__END__/m, '')).render }
+get('/_stylesheet.css') { File.read('stylesheet.css') }
 
 get '/_list' do
-  @pages = $repo.commits.first.tree.contents.map { |blob| Page.new(blob.name) }
+  if $repo.commits.empty?
+    @pages = []
+  else
+    @pages = $repo.commits.first.tree.contents.map { |blob| Page.new(blob.name) }
+  end
+  
   haml(list)
 end
 
@@ -110,61 +123,9 @@ def list
   layout('Listing pages', %q{
     %h1 All pages
     - if @pages.empty?
-      %p No page found :-(
+      %p No pages found.
     - else
       %ul= @pages.each(&:to_s)
   })
 end
 
-__END__
-body
-  :font
-    family: Verdana, Arial, "Bitstream Vera Sans", Helvetica, sans-serif
-    size: 14px
-    color: black
-  line-height: 160%
-  background-color: white
-  margin: 2em
-
-#navigation
-  a
-    background-color: #e0e0e0
-    color: black
-    text-decoration: none
-    padding: 2px
-  padding: 5px
-  border-bottom: 1px black solid
-
-h1
-  display: block
-  padding-bottom: 5px
-
-a
-  color: black
-
-.submit
-  font-size: large
-  font-weight: bold
-
-.page_title
-  font-size: xx-large
-
-.edit_link
-  color: black
-  font-size: 14px
-  font-weight: bold
-  background-color: #e0e0e0
-  font-variant: small-caps
-  text-decoration: none
-
-.cancel
-  background-color: #e0e0e0
-  font-weight: normal
-  text-decoration: none
-  font-size: 14px 
-
-.cancel:before
-  content: "("
-
-.cancel:after
-  content: ")"
