@@ -29,7 +29,8 @@ class Page
   end
 
   def body
-    @body ||= BlueCloth.new(RubyPants.new(raw_body).to_html).to_html
+    @body ||= BlueCloth.new(RubyPants.new(raw_body).to_html).to_html.
+      gsub(/\b((?:[A-Z]\w+){2,})/) { |m| "<a href=\"/#{m}\">#{m}</a>" }
   end
 
   def raw_body
