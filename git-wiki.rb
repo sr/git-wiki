@@ -53,7 +53,7 @@ class Page
 end
 
 get('/') { redirect '/' + HOMEPAGE }
-get('/_stylesheet.css') { File.read('stylesheet.css') }
+get('/_stylesheet.css') { Sass::Engine.new(File.read(__FILE__).gsub(/.*__END__/m, '')).render }
 
 get '/_list' do
   if $repo.commits.empty?
@@ -129,3 +129,55 @@ def list
   })
 end
 
+__END__
+body
+  :font
+    family: Verdana, Arial, "Bitstream Vera Sans", Helvetica, sans-serif
+    size: 14px
+    color: black
+  line-height: 160%
+  background-color: white
+  margin: 2em
+
+#navigation
+  a
+    background-color: #e0e0e0
+    color: black
+    text-decoration: none
+    padding: 2px
+  padding: 5px
+  border-bottom: 1px black solid
+
+h1
+  display: block
+  padding-bottom: 5px
+
+a
+  color: black
+
+.submit
+  font-size: large
+  font-weight: bold
+
+.page_title
+  font-size: xx-large
+
+.edit_link
+  color: black
+  font-size: 14px
+  font-weight: bold
+  background-color: #e0e0e0
+  font-variant: small-caps
+  text-decoration: none
+
+.cancel
+  background-color: #e0e0e0
+  font-weight: normal
+  text-decoration: none
+  font-size: 14px 
+
+.cancel:before
+  content: "("
+
+.cancel:after
+  content: ")"
