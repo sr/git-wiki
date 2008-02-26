@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-%w(rubygems sinatra grit maruku rubypants haml).each do |a_gem| 
+%w(rubygems sinatra grit bluecloth rubypants haml).each do |dependency| 
   begin
-    require a_gem
+    require dependency
   rescue LoadError => e
-    puts "You need to 'sudo gem install #{a_gem}' before we can proceed"
+    puts "You need to install #{dependency} before we can proceed"
   end
 end
 
@@ -29,7 +29,7 @@ class Page
   end
 
   def body
-    @body ||= Maruku.new(RubyPants.new(raw_body).to_html).to_html
+    @body ||= BlueCloth.new(RubyPants.new(raw_body).to_html).to_html
   end
 
   def raw_body
