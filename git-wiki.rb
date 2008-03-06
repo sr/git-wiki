@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-%w(rubygems sinatra grit bluecloth rubypants haml).each do |dependency| 
+%w(rubygems sinatra git bluecloth rubypants haml).each do |dependency| 
   begin
     require dependency
   rescue LoadError => e
@@ -9,16 +9,14 @@
 end
 
 GIT_REPO = ENV['HOME'] + '/wiki'
-GIT_DIR  = File.join(GIT_REPO, '.git')
 HOMEPAGE = 'Home'
 
-unless File.exists?(GIT_DIR) && File.directory?(GIT_DIR)
-  FileUtils.mkdir_p(GIT_DIR)
+unless File.exists?(GIT_REPO) && File.directory?(GIT_REPO)
   puts "Initializing repository in #{GIT_REPO}..."
-  `git --git-dir #{GIT_DIR} init`
+  Git.init(GIT_REPO)
 end
 
-$repo = Grit::Repo.new(GIT_REPO)
+$repo = Git.open(GIT_REPO)
 
 class Page
   attr_reader :name
@@ -40,12 +38,17 @@ class Page
   def body=(content)
     File.open(@filename, 'w') { |f| f << content }
     message = tracked? ? "Edited #{@name}" : "Created #{@name}"
-    `cd #{GIT_REPO} && git add #{@name} && git commit -m "#{message}"`
+    $repo.add(@name)
+    $repo.commit(message)
   end
 
   def tracked?
-    return false if $repo.commits.empty?
-    $repo.commits.first.tree.contents.map { |b| b.name }.include?(@name)    
+    begin
+      return false if $repo.log.size == 0
+      $repo.log.first.gtree.children.keys.include?(@name)    
+    rescue 
+      return false
+    end
   end
 
   def to_s
@@ -57,10 +60,10 @@ get('/') { redirect '/' + HOMEPAGE }
 get('/_stylesheet.css') { Sass::Engine.new(File.read(__FILE__).gsub(/.*__END__/m, '')).render }
 
 get '/_list' do
-  if $repo.commits.empty?
+  if $repo.log.size == 0
     @pages = []
   else
-    @pages = $repo.commits.first.tree.contents.map { |blob| Page.new(blob.name) }
+    @pages = $repo.log.first.gtree.children.map { |name, blob| Page.new(name) }
   end
   
   haml(list)
