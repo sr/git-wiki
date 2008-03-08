@@ -16,9 +16,13 @@ unless File.exists?(GIT_REPO) && File.directory?(GIT_REPO)
   Git.init(GIT_REPO)
 end
 
-$repo = Git.open(GIT_REPO)
-
 class Page
+  class << self
+    attr_accessor :repo
+  end
+
+  self.repo = Git.open(GIT_REPO)
+
   attr_reader :name
 
   def initialize(name)
@@ -38,14 +42,14 @@ class Page
   def body=(content)
     File.open(@filename, 'w') { |f| f << content }
     message = tracked? ? "Edited #{@name}" : "Created #{@name}"
-    $repo.add(@name)
-    $repo.commit(message)
+    Page.repo.add(@name)
+    Page.repo.commit(message)
   end
 
   def tracked?
     begin
       return false if $repo.log.size == 0
-      $repo.log.first.gtree.children.keys.include?(@name)    
+      Page.repo.log.first.gtree.children.keys.include?(@name)    
     rescue 
       return false
     end
@@ -60,10 +64,10 @@ get('/') { redirect '/' + HOMEPAGE }
 get('/_stylesheet.css') { Sass::Engine.new(File.read(__FILE__).gsub(/.*__END__/m, '')).render }
 
 get '/_list' do
-  if $repo.log.size == 0
+  if Page.repo.log.size == 0
     @pages = []
   else
-    @pages = $repo.log.first.gtree.children.map { |name, blob| Page.new(name) }
+    @pages = Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name) }
   end
   
   haml(list)
