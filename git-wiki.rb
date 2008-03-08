@@ -32,7 +32,10 @@ class Page
 
   def body
     @body ||= BlueCloth.new(RubyPants.new(raw_body).to_html).to_html.
-      gsub(/\b((?:[A-Z]\w+){2,})/) { |m| "<a href=\"/#{m}\">#{m}</a>" }
+      gsub(/\b((?:[A-Z]\w+){2,})/) do |page|
+        css_class = Page.new(page).tracked? ? 'exists' : 'unknown'
+        "<a class='#{css_class}' href='#{page}'>#{page}</a>"
+      end
   end
 
   def raw_body
@@ -162,6 +165,11 @@ h1
 
 a
   color: black
+
+a.exists
+  font-weight: bold
+a.unknown
+  font-style: italic
 
 .submit
   font-size: large
