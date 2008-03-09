@@ -70,7 +70,7 @@ get '/_list' do
   if Page.repo.log.size == 0
     @pages = []
   else
-    @pages = Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name) }
+    @pages = Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name) }.sort_by { |p| p.name }
   end
   
   haml(list)
