@@ -23,6 +23,11 @@ class Page
 
   self.repo = Git.open(GIT_REPO)
 
+  def self.find_all
+    return [] if Page.repo.log.size == 0
+    Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name) }.sort_by { |p| p.name }
+  end
+
   attr_reader :name
 
   def initialize(name)
@@ -67,12 +72,7 @@ get('/') { redirect '/' + HOMEPAGE }
 get('/_stylesheet.css') { Sass::Engine.new(File.read(__FILE__).gsub(/.*__END__/m, '')).render }
 
 get '/_list' do
-  if Page.repo.log.size == 0
-    @pages = []
-  else
-    @pages = Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name) }.sort_by { |p| p.name }
-  end
-  
+  @pages = Page.find_all
   haml(list)
 end
 
