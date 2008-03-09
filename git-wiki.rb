@@ -55,12 +55,7 @@ class Page
   end
 
   def tracked?
-    begin
-      return false if $repo.log.size == 0
-      Page.repo.log.first.gtree.children.keys.include?(@name)    
-    rescue 
-      return false
-    end
+    Page.repo.ls_files.keys.include?(@name)
   end
 
   def to_s
