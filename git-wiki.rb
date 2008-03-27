@@ -1,15 +1,15 @@
 #!/usr/bin/env ruby
-
-%w(rubygems sinatra git bluecloth rubypants haml).each do |dependency| 
+%w(sinatra haml sass rubygems git bluecloth rubypants).each do |dependency|
   begin
+    $: << File.expand_path(File.dirname(__FILE__) + "/vendor/#{dependency}/lib")
     require dependency
-  rescue LoadError => e
-    puts "You need to install #{dependency} before we can proceed"
+  rescue LoadError
+    abort "Unable to load #{dependency}. Did you run 'git submodule init' ? If so install #{dependency}"
   end
 end
 
-GIT_REPO = ENV['HOME'] + '/wiki'
-HOMEPAGE = 'Home'
+GIT_REPO = ENV['HOME'] + '/wiki' unless defined?(GIT_REPO)
+HOMEPAGE = 'Home' unless defined?(HOMEPAGE)
 
 unless File.exists?(GIT_REPO) && File.directory?(GIT_REPO)
   puts "Initializing repository in #{GIT_REPO}..."
@@ -38,8 +38,7 @@ class Page
   def body
     @body ||= BlueCloth.new(RubyPants.new(raw_body).to_html).to_html.
       gsub(/\b((?:[A-Z]\w+){2,})/) do |page|
-        css_class = Page.new(page).tracked? ? 'exists' : 'unknown'
-        "<a class='#{css_class}' href='#{page}'>#{page}</a>"
+        "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknwon'}' href='#{page}'>#{page}</a>"
       end
   end
 
