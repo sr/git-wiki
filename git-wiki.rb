@@ -71,8 +71,16 @@ helpers do
   end
 end
 
+before do
+  header 'Content-Type' => 'text/html; charset=utf-8'
+end
+
 get('/') { redirect '/' + HOMEPAGE }
-get('/_stylesheet.css') { Sass::Engine.new(template('stylesheet')).render }
+
+get('/_stylesheet.css') do
+  header 'Content-Type' => 'text/css; charset=utf-8'
+  Sass::Engine.new(template('stylesheet')).render
+end
 
 get '/_list' do
   @pages = Page.find_all
