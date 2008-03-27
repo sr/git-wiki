@@ -62,22 +62,31 @@ class Page
   end
 end
 
+use_in_file_templates!
+
+helpers do
+  def title(title=nil)
+    @title = title unless title.nil?
+    @title
+  end
+end
+
 get('/') { redirect '/' + HOMEPAGE }
-get('/_stylesheet.css') { Sass::Engine.new(File.read(__FILE__).gsub(/.*__END__/m, '')).render }
+get('/_stylesheet.css') { Sass::Engine.new(template('stylesheet')).render }
 
 get '/_list' do
   @pages = Page.find_all
-  haml(list)
+  haml :list
 end
 
 get '/:page' do
   @page = Page.new(params[:page])
-  @page.tracked? ? haml(show) : redirect('/e/' + @page.name)
+  @page.tracked? ? haml(:show) : redirect("/e/#{@page.name}")
 end
 
 get '/e/:page' do
   @page = Page.new(params[:page])
-  haml(edit)
+  haml :edit
 end
 
 post '/e/:page' do
@@ -86,55 +95,45 @@ post '/e/:page' do
   redirect '/' + @page.name
 end
 
-def layout(title, content)
-  %Q(
+__END__
+## layout
 %html
   %head
-    %title #{title}
-    %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css', :media => 'screen'}
-    %meta{'http-equiv' => 'Content-Type', :content => 'text/html; charset=utf-8'}
-
+    %title= title
+    %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css'}
   %body
     #navigation
       %a{:href => '/'} Home
       %a{:href => '/_list'} List
-    #{content}
-  )
-end
+    #content= yield
 
-def show
-  layout(@page.name, %q(
-      %a{:href => '/e/' + @page.name, :class => 'edit_link'} edit this page
-    %h1{:class => 'page_title'}= @page.name
-    #page_content= @page.body
-  ))
-end
+## show
+- title @page.name
 
-def edit
-  layout("Editing #{@page.name}", %q(
-    %h1
-      Editing
-      = @page.name
-      %a{:href => 'javascript:history.back()', :class => 'cancel'} Cancel
-    %form{ :method => 'POST', :action => '/e/' + params[:page]}
-      %p
-        ~"<textarea name='body' rows='25' cols='130'>#{@page.raw_body}</textarea>"
-      %p
-        %input{:type => :submit, :value => 'Save as the newest version', :class => :submit}
-  ))
-end
+%a{:href => '/e/' + @page.name, :class => 'edit_link'} edit this page
+%h1= title
+#page_content= @page.body
 
-def list
-  layout('Listing pages', %q{
-    %h1 All pages
-    - if @pages.empty?
-      %p No pages found.
-    - else
-      %ul= @pages.each(&:to_s)
-  })
-end
+## edit
+- title "Editing #{@page.name}"
 
-__END__
+%h1= title
+%form{ :method => 'POST', :action => '/e/' + params[:page]}
+%p
+  ~"<textarea name='body' rows='25' cols='130'>#{@page.raw_body}</textarea>"
+%p
+  %input{:type => :submit, :value => 'Save as the newest version', :class => :submit}
+
+## list
+- title "Listing pages"
+
+%h1 All pages
+- if @pages.empty?
+  %p No pages found.
+- else
+  %ul#page_list= @pages.each(&:to_s)
+
+## stylesheet
 body
   :font
     family: Verdana, Arial, "Bitstream Vera Sans", Helvetica, sans-serif
