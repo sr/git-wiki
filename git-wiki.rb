@@ -58,7 +58,7 @@ class Page
   end
 
   def to_s
-    "<a class='page_name' href='/#{@name}'>#{@name}</a>&nbsp;<a class='edit' href='/e/#{@name}'>edit</a></li>"
+    @name
   end
 end
 
@@ -68,6 +68,10 @@ helpers do
   def title(title=nil)
     @title = title unless title.nil?
     @title
+  end
+
+  def list_item(page)
+    "<a class='page_name' href='/#{page}'>#{page}</a>&nbsp;<a class='edit' href='/e/#{page}'>edit</a>"
   end
 end
 
@@ -108,7 +112,7 @@ end
 post '/e/:page' do
   @page = Page.new(params[:page])
   @page.body = params[:body]
-  request.xhr? ? @page.body : redirect('/' + @page.name)
+  request.xhr? ? @page.body : redirect("/#{@page.name}")
 end
 
 __END__
@@ -161,15 +165,15 @@ __END__
       }
     });
 
-    $('#page_content').editable('/e/#{@page.name}', {
-      loadurl: '/#{@page.name}.txt',
+    $('#page_content').editable('/e/#{@page}', {
+      loadurl: '/#{@page}.txt',
       submit: '<button type="submit" style="font-weight: normal;">Save as the newest version</button>',
       cancel: '<a title="Cancel editing" href="" style="text-decoration: underline; margin-left: 5px; crosshair: pointer;">cancel</a>',
       event: 'dblclick',
       type: 'autogrow',
       name: 'body',
       onblur: 'ignore',
-      tooltip: '',
+      tooltip: ' ',
       indicator: 'Saving...',
       loadtext: '',
       cssclass: 'edit_form',
@@ -179,26 +183,26 @@ __END__
         minHeight: 84
       },
       callback: function(v, s) {
-        $('#content').prepend('<p id="notice">New version successfuly saved!</p>');
-        $('#notice').fadeOut(100, function() { $(this).remove() })
+        /**notice = $('<p id="notice">New version successfuly saved!</p>').fadeOut('slow')
+        $('#content').prepend(notice.html())*/
       }
     })
   })
-%a#edit_link{:href => '/e/' + @page.name} edit this page
+%a#edit_link{:href => '/e/#{@page}'} edit this page
 %h1= title
 #page_content= @page.body
 
 ## edit
-- title "Editing #{@page.name}"
+- title "Editing #{@page}"
 
 %h1= title
-%form{ :method => 'POST', :action => '/e/' + @page.name}
+%form{ :method => 'POST', :action => '/e/#{@page}'
   %p
     ~"<textarea name='body' rows='16' cols='60'>#{@page.raw_body}</textarea>"
   %p
     %input.submit{:type => :submit, :value => 'Save as the newest version'}
     or
-    %a.cancel{:href=>'/' + @page.name} cancel
+    %a.cancel{:href=>'/' + @page} cancel
 
 ## list
 - title "Listing pages"
@@ -210,9 +214,9 @@ __END__
   %ul#pages_list
   - @pages.each_with_index do |page, index|
     - if (index % 2) == 0
-      %li.odd= page
+      %li.odd= list_item(page)
     - else
-      %li.even= page
+      %li.even= list_item(page)
   - end
 
 ## stylesheet
