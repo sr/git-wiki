@@ -58,7 +58,7 @@ class Page
   end
 
   def to_s
-    "<li><strong><a href='/#{@name}'>#{@name}</a></strong> — <a href='/e/#{@name}'>edit</a></li>"
+    "<a class='page_name' href='/#{@name}'>#{@name}</a>&nbsp;<a class='edit' href='/e/#{@name}'>edit</a></li>"
   end
 end
 
@@ -162,8 +162,8 @@ __END__
 
     $('#page_content').editable('/e/#{@page.name}', {
       loadurl: '/#{@page.name}.txt',
-      submit: '<button type="submit" style="font-weight: bold;">Save as the newest version</button>',
-      cancel: '<a title="Cancel editing" href="" style="text-decoration: underline; margin-left: 5px; crosshair: pointer;">Cancel</a>',
+      submit: '<button type="submit" style="font-weight: normal;">Save as the newest version</button>',
+      cancel: '<a title="Cancel editing" href="" style="text-decoration: underline; margin-left: 5px; crosshair: pointer;">cancel</a>',
       event: 'dblclick',
       type: 'autogrow',
       name: 'body',
@@ -191,20 +191,28 @@ __END__
 - title "Editing #{@page.name}"
 
 %h1= title
-%form{ :method => 'POST', :action => '/e/' + params[:page]}
+%form{ :method => 'POST', :action => '/e/' + @page.name}
   %p
-    ~"<textarea name='body' rows='25' cols='130'>#{@page.raw_body}</textarea>"
+    ~"<textarea name='body' rows='16' cols='60'>#{@page.raw_body}</textarea>"
   %p
     %input.submit{:type => :submit, :value => 'Save as the newest version'}
+    or
+    %a.cancel{:href=>'/' + @page.name} cancel
 
 ## list
 - title "Listing pages"
 
 %h1 All pages
 - if @pages.empty?
-  %p No pages found.
+%p No pages found.
 - else
-  %ul#page_list= @pages.each(&:to_s)
+  %ul#pages_list
+  - @pages.each_with_index do |page, index|
+    - if (index % 2) == 0
+      %li.odd= page
+    - else
+      %li.even= page
+  - end
 
 ## stylesheet
 body
@@ -217,6 +225,13 @@ body
   margin: 0
   padding: 0
 
+#navigation
+  padding-left: 2em
+  margin: 0
+  li
+    list-style-type: none
+    display: inline
+
 #content
   padding: 2em
 .notice
@@ -225,18 +240,18 @@ body
 
 a
   padding: 2px
-a.exists
   color: blue
-a.exists:hover
-  background-color: blue
-  text-decoration: none
-  color: white
-a.unknown
-  color: gray
-a.unknwown:hover
-  background-color: gray
-  color: white
-  text-decoration: none
+  &.exists
+    &:hover
+      background-color: blue
+      text-decoration: none
+      color: white
+  &.unknown
+    color: gray
+    &:hover
+      background-color: gray
+      color: white
+      text-decoration: none
 
 textarea
   font-family: courrier
@@ -245,8 +260,31 @@ textarea
   line-height: 18px
 
 .edit_link
+  display: block
+  background-color: #ffc
   font-weight: bold
+  text-decoration: none
+  color: black
+  &:hover
+    color: white
+    background-color: red
 
 .submit
-  font-size: large
   font-weight: bold
+
+.cancel
+  color: red
+  &:hover
+    text-decoration: none
+    background-color: red
+    color: white
+ul#pages_list
+  list-style-type: none
+  margin: 0
+  padding: 0
+  li
+    padding: 5px
+    a.edit
+      display: none 
+    &.odd
+      background-color: #D3D3D3
