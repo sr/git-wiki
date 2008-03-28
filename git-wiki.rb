@@ -120,12 +120,15 @@ __END__
     %script{:src => '/jquery-1.2.3.min.js', :type => 'text/javascript'}
     %script{:src => '/jquery.jeditable.js', :type => 'text/javascript'}
     %script{:src => '/jquery.autogrow.js', :type => 'text/javascript'}
+    %script{:src => '/jquery.hotkeys.js', :type => 'text/javascript'}
     :javascript
       $(document).ready(function() {
         $('#navigation').hide();
         $('#edit_link').hide();
         /*$('#content').prepend('<p id="help">Press <strong>CTRL+H</strong> if you need help</strong></p>');*/
         $('#help').fadeOut(3500);
+        $.hotkeys.add('Ctrl+h', function() { document.location = '#{HOMEPAGE}' })
+        $.hotkeys.add('Ctrl+l', function() { document.location = '/_list' })
       })
   %body
     %ul#navigation
