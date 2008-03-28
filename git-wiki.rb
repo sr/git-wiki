@@ -200,13 +200,13 @@ __END__
 - title "Editing #{@page}"
 
 %h1= title
-%form{ :method => 'POST', :action => '/e/#{@page}'
+%form{:method => 'POST', :action => '/e/#{@page}'}
   %p
     ~"<textarea name='body' rows='16' cols='60'>#{@page.raw_body}</textarea>"
   %p
     %input.submit{:type => :submit, :value => 'Save as the newest version'}
     or
-    %a.cancel{:href=>'/' + @page} cancel
+    %a.cancel{:href=>'/#{@page}'} cancel
 
 ## list
 - title "Listing pages"
