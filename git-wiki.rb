@@ -38,7 +38,7 @@ class Page
   def body
     @body ||= BlueCloth.new(RubyPants.new(raw_body).to_html).to_html.
       gsub(/\b((?:[A-Z]\w+){2,})/) do |page|
-        "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknwon'}' href='#{page}'>#{page}</a>"
+        "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknown'}' href='#{page}'>#{page}</a>"
       end
   end
 
@@ -120,17 +120,25 @@ __END__
     %script{:src => '/jquery-1.2.3.min.js', :type => 'text/javascript'}
     %script{:src => '/jquery.jeditable.js', :type => 'text/javascript'}
     %script{:src => '/jquery.autogrow.js', :type => 'text/javascript'}
+    :javascript
+      $(document).ready(function() {
+        $('#navigation').hide();
+        $('#edit_link').hide();
+        /*$('#content').prepend('<p id="help">Press <strong>CTRL+H</strong> if you need help</strong></p>');*/
+        $('#help').fadeOut(3500);
+      })
   %body
-    #navigation
-      %a{:href => '/'} Home
-      %a{:href => '/_list'} List
+    %ul#navigation
+      %li
+        %a{:href => '/'} Home
+      %li
+        %a{:href => '/_list'} List
     #content= yield
 
 ## show
 - title @page.name
 :javascript
   $(document).ready(function() {
-
     $.editable.addInputType('autogrow', {
       element : function(settings, original) {
         var textarea = $('<textarea>');
@@ -155,23 +163,27 @@ __END__
     $('#page_content').editable('/e/#{@page.name}', {
       loadurl: '/#{@page.name}.txt',
       submit: '<button type="submit" style="font-weight: bold;">Save as the newest version</button>',
-      cancel: '<a style="text-decoration: underline; margin-left: 5px;">Cancel</a>',
-      event: 'click',
+      cancel: '<a title="Cancel editing" href="" style="text-decoration: underline; margin-left: 5px; crosshair: pointer;">Cancel</a>',
+      event: 'dblclick',
       type: 'autogrow',
-      tooltip: 'Click to edit.',
       name: 'body',
       onblur: 'ignore',
+      tooltip: '',
+      indicator: 'Saving...',
+      loadtext: '',
       cssclass: 'edit_form',
       autogrow: {
         maxHeight: 100,
         lineHeight: 16,
-        minHeight: 32
+        minHeight: 84
+      },
+      callback: function(v, s) {
+        $('#content').prepend('<p id="notice">New version successfuly saved!</p>');
+        $('#notice').fadeOut(100, function() { $(this).remove() })
       }
     })
-
-    $('a:first').css('font-weight', 'bold')
   })
-%a{:href => '/e/' + @page.name, :class => 'edit_link'} edit this page
+%a.edit_link{:href => '/e/' + @page.name} edit this page
 %h1= title
 #page_content= @page.body
 
@@ -183,7 +195,7 @@ __END__
   %p
     ~"<textarea name='body' rows='25' cols='130'>#{@page.raw_body}</textarea>"
   %p
-    %input{:type => :submit, :value => 'Save as the newest version', :class => :submit}
+    %input.submit{:type => :submit, :value => 'Save as the newest version'}
 
 ## list
 - title "Listing pages"
@@ -197,57 +209,44 @@ __END__
 ## stylesheet
 body
   :font
-    family: Verdana, Arial, "Bitstream Vera Sans", Helvetica, sans-serif
+    family: "Lucida Grande", Verdana, Arial, Bitstream Vera Sans, Helvetica, sans-serif
     size: 14px
     color: black
   line-height: 160%
   background-color: white
-  margin: 2em
+  margin: 0
+  padding: 0
 
-#navigation
-  a
-    background-color: #e0e0e0
-    color: black
-    text-decoration: none
-    padding: 2px
-  padding: 5px
-  border-bottom: 1px black solid
-
-h1
-  display: block
-  padding-bottom: 5px
+#content
+  padding: 2em
+.notice
+  background-color: #ffc
+  padding: 6px
 
 a
-  color: black
-
+  padding: 2px
 a.exists
-  font-weight: bold
+  color: blue
+a.exists:hover
+  background-color: blue
+  text-decoration: none
+  color: white
 a.unknown
-  font-style: italic
+  color: gray
+a.unknwown:hover
+  background-color: gray
+  color: white
+  text-decoration: none
+
+textarea
+  font-family: courrier
+  padding: 5px
+  font-size: 14px
+  line-height: 18px
+
+.edit_link
+  font-weight: bold
 
 .submit
   font-size: large
   font-weight: bold
-
-.page_title
-  font-size: xx-large
-
-.edit_link
-  color: black
-  font-size: 14px
-  font-weight: bold
-  background-color: #e0e0e0
-  font-variant: small-caps
-  text-decoration: none
-
-.cancel
-  background-color: #e0e0e0
-  font-weight: normal
-  text-decoration: none
-  font-size: 14px 
-
-.cancel:before
-  content: "("
-
-.cancel:after
-  content: ")"
