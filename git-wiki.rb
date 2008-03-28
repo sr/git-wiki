@@ -8,20 +8,12 @@
   end
 end
 
-GIT_REPO = ENV['HOME'] + '/wiki' unless defined?(GIT_REPO)
-HOMEPAGE = 'Home' unless defined?(HOMEPAGE)
 
-unless File.exists?(GIT_REPO) && File.directory?(GIT_REPO)
-  puts "Initializing repository in #{GIT_REPO}..."
-  Git.init(GIT_REPO)
-end
 
 class Page
   class << self
     attr_accessor :repo
   end
-
-  self.repo = Git.open(GIT_REPO)
 
   def self.find_all
     return [] if Page.repo.log.size == 0
@@ -32,7 +24,7 @@ class Page
 
   def initialize(name)
     @name = name
-    @filename = File.join(GIT_REPO, @name)
+    @filename = File.join(GIT_REPOSITORY, @name)
   end
 
   def body
@@ -60,6 +52,18 @@ class Page
   def to_s
     @name
   end
+end
+
+configure do
+  GIT_REPOSITORY = ENV['HOME'] + '/wiki'
+  HOMEPAGE = 'Home'
+
+  unless File.exists?(GIT_REPOSITORY) && File.directory?(GIT_REPOSITORY)
+    puts "Initializing repository in #{GIT_REPOSITORY}..."
+    Git.init(GIT_REPOSITORY)
+  end
+
+  Page.repo = Git.open(GIT_REPOSITORY)
 end
 
 use_in_file_templates!
