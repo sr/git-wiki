@@ -92,6 +92,14 @@ get '/:page' do
   @page.tracked? ? haml(:show) : redirect("/e/#{@page.name}")
 end
 
+# Waiting for Black's new awesome route system
+get '/:page.txt' do
+  @page = Page.new(params[:page])
+  throw :halt, [404, "Unknown page #{format[:page]}"] unless @page.tracked?
+  header 'Content-Type' => 'text/plain; charset=utf-8'
+  @page.raw_body
+end
+
 get '/e/:page' do
   @page = Page.new(params[:page])
   haml :edit
@@ -100,7 +108,7 @@ end
 post '/e/:page' do
   @page = Page.new(params[:page])
   @page.body = params[:body]
-  redirect '/' + @page.name
+  request.xhr? ? @page.body : redirect('/' + @page.name)
 end
 
 __END__
@@ -109,6 +117,9 @@ __END__
   %head
     %title= title
     %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css'}
+    %script{:src => '/jquery-1.2.3.min.js', :type => 'text/javascript'}
+    %script{:src => '/jquery.jeditable.js', :type => 'text/javascript'}
+    %script{:src => '/jquery.autogrow.js', :type => 'text/javascript'}
   %body
     #navigation
       %a{:href => '/'} Home
@@ -117,7 +128,49 @@ __END__
 
 ## show
 - title @page.name
+:javascript
+  $(document).ready(function() {
 
+    $.editable.addInputType('autogrow', {
+      element : function(settings, original) {
+        var textarea = $('<textarea>');
+        if (settings.rows) {
+          textarea.attr('rows', settings.rows);
+        } else {
+          textarea.height(settings.height);
+        }
+        if (settings.cols) {
+          textarea.attr('cols', settings.cols);
+        } else {
+          textarea.width(settings.width);
+        }
+        $(this).append(textarea);
+        return(textarea);
+      },
+      plugin : function(settings, original) {
+        $('textarea', this).autogrow(settings.autogrow);
+      }
+    });
+
+    $('#page_content').editable('/e/#{@page.name}', {
+      loadurl: '/#{@page.name}.txt',
+      submit: '<button type="submit" style="font-weight: bold;">Save as the newest version</button>',
+      cancel: '<a style="text-decoration: underline; margin-left: 5px;">Cancel</a>',
+      event: 'click',
+      type: 'autogrow',
+      tooltip: 'Click to edit.',
+      name: 'body',
+      onblur: 'ignore',
+      cssclass: 'edit_form',
+      autogrow: {
+        maxHeight: 100,
+        lineHeight: 16,
+        minHeight: 32
+      }
+    })
+
+    $('a:first').css('font-weight', 'bold')
+  })
 %a{:href => '/e/' + @page.name, :class => 'edit_link'} edit this page
 %h1= title
 #page_content= @page.body
@@ -127,10 +180,10 @@ __END__
 
 %h1= title
 %form{ :method => 'POST', :action => '/e/' + params[:page]}
-%p
-  ~"<textarea name='body' rows='25' cols='130'>#{@page.raw_body}</textarea>"
-%p
-  %input{:type => :submit, :value => 'Save as the newest version', :class => :submit}
+  %p
+    ~"<textarea name='body' rows='25' cols='130'>#{@page.raw_body}</textarea>"
+  %p
+    %input{:type => :submit, :value => 'Save as the newest version', :class => :submit}
 
 ## list
 - title "Listing pages"
