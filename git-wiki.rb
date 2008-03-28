@@ -171,7 +171,7 @@ __END__
 
     $('#page_content').editable('/e/#{@page}', {
       loadurl: '/#{@page}.txt',
-      submit: '<button type="submit" style="font-weight: normal;">Save as the newest version</button>',
+      submit: '<button class="submit" type="submit">Save as the newest version</button>',
       cancel: '<a class="cancel" href="" style="margin-left: 5px;">cancel</a>',
       event: 'dblclick',
       type: 'autogrow',
