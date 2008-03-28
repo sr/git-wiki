@@ -175,17 +175,14 @@ __END__
       cancel: '<a class="cancel" href="" style="margin-left: 5px;">cancel</a>',
       event: 'dblclick',
       type: 'autogrow',
+      cols: 84,
+      rows: 20,
       name: 'body',
       onblur: 'ignore',
       tooltip: ' ',
       indicator: 'Saving...',
       loadtext: '',
       cssclass: 'edit_form',
-      autogrow: {
-        maxHeight: 100,
-        lineHeight: 16,
-        minHeight: 84
-      },
       callback: function(v, s) {
         /**notice = $('<p id="notice">New version successfuly saved!</p>').fadeOut('slow')
         $('#content').prepend(notice.html())*/
