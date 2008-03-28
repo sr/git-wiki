@@ -8,8 +8,6 @@
   end
 end
 
-
-
 class Page
   class << self
     attr_accessor :repo
@@ -54,9 +52,12 @@ class Page
   end
 end
 
+use_in_file_templates!
+
 configure do
   GIT_REPOSITORY = ENV['HOME'] + '/wiki'
   HOMEPAGE = 'Home'
+  haml_options :format => :html4
 
   unless File.exists?(GIT_REPOSITORY) && File.directory?(GIT_REPOSITORY)
     puts "Initializing repository in #{GIT_REPOSITORY}..."
@@ -66,7 +67,6 @@ configure do
   Page.repo = Git.open(GIT_REPOSITORY)
 end
 
-use_in_file_templates!
 
 helpers do
   def title(title=nil)
@@ -121,6 +121,7 @@ end
 
 __END__
 ## layout
+!!! strict
 %html
   %head
     %title= title
