@@ -1,0 +1,6 @@
+[submodule "vendor/sinatra"]
+	path = vendor/sinatra
+	url = git://github.com/sr/sinatra.git
+[submodule "vendor/haml"]
+	path = vendor/haml
+	url = git://github.com/nex3/haml.git
