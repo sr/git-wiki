@@ -125,8 +125,6 @@ __END__
       $(document).ready(function() {
         $('#navigation').hide();
         $('#edit_link').hide();
-        /*$('#content').prepend('<p id="help">Press <strong>CTRL+H</strong> if you need help</strong></p>');*/
-        $('#help').fadeOut(3500);
         $.hotkeys.add('Ctrl+h', function() { document.location = '#{HOMEPAGE}' })
         $.hotkeys.add('Ctrl+l', function() { document.location = '/_list' })
       })
@@ -186,7 +184,7 @@ __END__
       }
     })
   })
-%a.edit_link{:href => '/e/' + @page.name} edit this page
+%a#edit_link{:href => '/e/' + @page.name} edit this page
 %h1= title
 #page_content= @page.body
 
