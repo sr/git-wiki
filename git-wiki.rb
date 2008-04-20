@@ -105,7 +105,7 @@ end
 # Waiting for Black's new awesome route system
 get '/:page.txt' do
   @page = Page.new(params[:page])
-  throw :halt, [404, "Unknown page #{format[:page]}"] unless @page.tracked?
+  throw :halt, [404, "Unknown page #{params[:page]}"] unless @page.tracked?
   content_type 'text/plain', :charset => 'utf-8'
   @page.raw_body
 end
