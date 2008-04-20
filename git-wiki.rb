@@ -57,7 +57,7 @@ use_in_file_templates!
 configure do
   GIT_REPOSITORY = ENV['HOME'] + '/wiki'
   HOMEPAGE = 'Home'
-  haml_options :format => :html4
+  set_option :haml, :format => :html4
 
   unless File.exists?(GIT_REPOSITORY) && File.directory?(GIT_REPOSITORY)
     puts "Initializing repository in #{GIT_REPOSITORY}..."
@@ -80,14 +80,14 @@ helpers do
 end
 
 before do
-  header 'Content-Type' => 'text/html; charset=utf-8'
+  content_type 'text/html', :charset => 'utf-8'
 end
 
 get('/') { redirect '/' + HOMEPAGE }
 
 get('/_stylesheet.css') do
-  header 'Content-Type' => 'text/css; charset=utf-8'
-  Sass::Engine.new(template('stylesheet')).render
+  content_type 'text/css', :charset => 'utf-8'
+  sass :stylesheet
 end
 
 get '/_list' do
@@ -104,7 +104,7 @@ end
 get '/:page.txt' do
   @page = Page.new(params[:page])
   throw :halt, [404, "Unknown page #{format[:page]}"] unless @page.tracked?
-  header 'Content-Type' => 'text/plain; charset=utf-8'
+  content_type 'text/plain', :charset => 'utf-8'
   @page.raw_body
 end
 
