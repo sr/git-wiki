@@ -62,11 +62,23 @@ configure do
   set_option :haml, :format => :html4
 
   unless File.exists?(GIT_REPOSITORY) && File.directory?(GIT_REPOSITORY)
-    puts "Initializing repository in #{GIT_REPOSITORY}..."
+    puts "Initializing repository in #{GIT_REPOSITORY}"
     Git.init(GIT_REPOSITORY)
+    File.open(File.join(GIT_REPOSITORY, HOMEPAGE), 'w') do |f|
+      f.write(<<-EOF)
+## Welcome on git-wiki
+Congratulation, you managed to successfuly run git-wiki!   
+Feel free to edit this page (double-clik it) and start to use your wiki.  
+To access the page listing, hit <kbd>CTRL+L</kbd> and <kbd>CTRL+H</kbd> to go to the homepage.
+EOF
+    end
+
+    repository = Git.open(GIT_REPOSITORY)
+    repository.add(HOMEPAGE)
+    repository.commit('Initial commit')
   end
 
-  Page.repo = Git.open(GIT_REPOSITORY)
+  Page.repo = repository || Git.open(GIT_REPOSITORY)
 end
 
 
