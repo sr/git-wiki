@@ -57,7 +57,7 @@ end
 use_in_file_templates!
 
 configure do
-  GIT_REPOSITORY = ENV['HOME'] + '/wiki'
+  GIT_REPOSITORY = ENV['WIKI'] || File.join(ENV['HOME'], 'wiki')
   HOMEPAGE = 'Home'
   set_option :haml, :format => :html4
 
