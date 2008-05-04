@@ -25,9 +25,33 @@ To get them, run the fellowing commands :
 Note that git-wiki is released under the terms of the [WTPL][] so really, you
 can do what the fuck you want with it.
 
+Tip: run git-wiki as a daemon
+------------------------------
+
+1. Install the gem [daemons][].
+
+    `% sudo gem install daemons`
+
+2. Create a new service (don't forget to modify the path to git-wiki)
+<pre><code>% sudo cat > /etc/init.d/git-wiki &lt;&lt;EOF
+&#35;!/usr/bin/env ruby
+require 'rubygems'
+require 'daemons'
+Daemons.run('/home/simon/src/git-wiki/git-wiki.rb',
+     :dir_mode   => :system,
+     :log_output => true,
+     :mode       => :exec
+)
+EOF</code></pre>
+
+3. Install it as a boot service. On Ubuntu, run
+
+    `% sudo /usr/sbin/update-rc.d git-wiki defaults`
+
 [git]: http://git.or.cz/
 [Sinatra]: http://sinatrarb.com
 [git-wiki]: http://atonie.org/2008/02/git-wiki
 [HAML]: http://haml.hamptoncatlin.com/
 [gs]: http://www.kernel.org/pub/software/scm/git/docs/git-submodule.html
 [WTPL]: http://sam.zoy.org/wtfpl/
+[daemons]: http://daemons.rubyforge.org/
