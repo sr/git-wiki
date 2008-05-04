@@ -43,7 +43,6 @@ Daemons.run('/home/simon/src/git-wiki/git-wiki.rb',
      :mode       => :exec
 )
 EOF</code></pre>
-
 3. Install it as a boot service. On Ubuntu, run
 
     `% sudo /usr/sbin/update-rc.d git-wiki defaults`
