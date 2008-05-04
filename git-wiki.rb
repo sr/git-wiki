@@ -134,7 +134,7 @@ post '/e/:page' do
 end
 
 __END__
-## layout
+@@ layout
 !!! strict
 %html
   %head
@@ -159,7 +159,7 @@ __END__
         %a{:href => '/_list'} List
     #content= yield
 
-## show
+@@ show
 - title @page.name
 :javascript
   $(document).ready(function() {
@@ -208,7 +208,7 @@ __END__
 %h1= title
 #page_content= @page.body
 
-## edit
+@@ edit
 - title "Editing #{@page}"
 
 %h1= title
@@ -220,7 +220,7 @@ __END__
     or
     %a.cancel{:href=>"/#{@page}"} cancel
 
-## list
+@@ list
 - title "Listing pages"
 
 %h1 All pages
@@ -235,7 +235,7 @@ __END__
       %li.even= list_item(page)
   - end
 
-## stylesheet
+@@ stylesheet
 body
   :font
     family: "Lucida Grande", Verdana, Arial, Bitstream Vera Sans, Helvetica, sans-serif
