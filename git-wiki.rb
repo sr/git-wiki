@@ -26,14 +26,14 @@ class Page
   end
 
   def body
-    @body ||= BlueCloth.new(RubyPants.new(raw_body).to_html).to_html.
+    BlueCloth.new(RubyPants.new(raw_body).to_html).to_html.
       gsub(/\b((?:[A-Z]\w+){2,})/) do |page|
         "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknown'}' href='#{page}'>#{page}</a>"
       end
   end
 
   def raw_body
-    @raw_body ||= File.exists?(@filename) ? File.read(@filename) : ''
+    File.exists?(@filename) ? File.read(@filename) : ''
   end
 
   def body=(content)
