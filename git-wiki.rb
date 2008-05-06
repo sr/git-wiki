@@ -37,12 +37,11 @@ class Page
   end
 
   def body=(content)
+    return if content == raw_body
     File.open(@filename, 'w') { |f| f << content }
-    if Page.repo.status.changed.map{ |s| s.first}.include?(@name)
-      message = tracked? ? "Edited #{@name}" : "Created #{@name}"
-      Page.repo.add(@name)
-      Page.repo.commit(message)
-    end
+    message = tracked? ? "Edited #{@name}" : "Created #{@name}"
+    Page.repo.add(@name)
+    Page.repo.commit(message)
   end
 
   def tracked?
