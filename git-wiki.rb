@@ -148,7 +148,7 @@ __END__
       $(document).ready(function() {
         $('#navigation').hide();
         $('#edit_link').hide();
-        $.hotkeys.add('Ctrl+h', function() { document.location = '#{HOMEPAGE}' })
+        $.hotkeys.add('Ctrl+h', function() { document.location = '/#{HOMEPAGE}' })
         $.hotkeys.add('Ctrl+l', function() { document.location = '/_list' })
       })
   %body
