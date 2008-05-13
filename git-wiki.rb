@@ -205,7 +205,8 @@ __END__
   })
 %a#edit_link{:href => "/e/#{@page}"} edit this page
 %h1= title
-#page_content= @page.body
+#page_content
+  ~"#{@page.body}"
 
 @@ edit
 - title "Editing #{@page}"
