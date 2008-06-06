@@ -22,7 +22,7 @@ class Page
 
   def initialize(name)
     @name = name
-    @filename = File.join(GIT_REPOSITORY, @name)
+    @filename = File.join(GitRepository, @name)
   end
 
   def body
@@ -56,12 +56,12 @@ end
 use_in_file_templates!
 
 configure do
-  GIT_REPOSITORY = ENV['WIKI'] || File.join(ENV['HOME'], 'wiki')
-  HOMEPAGE = 'Home'
+  GitRepository = ENV['GIT_WIKI_REPOSITORY'] || File.join(ENV['HOME'], 'wiki')
+  Homepage = 'Home'
   set_option :haml, :format => :html4
 
-  unless (Page.repo = Git.open(GIT_REPOSITORY) rescue false)
-    abort "#{GIT_REPOSITORY}: Not a git repository. Install your wiki with `rake bootstrap`"
+  unless (Page.repo = Git.open(GitRepository) rescue false)
+    abort "#{GitRepository}: Not a git repository. Install your wiki with `rake bootstrap`"
   end
 end
 
@@ -81,7 +81,7 @@ before do
   content_type 'text/html', :charset => 'utf-8'
 end
 
-get('/') { redirect '/' + HOMEPAGE }
+get('/') { redirect '/' + Homepage }
 
 get('/_stylesheet.css') do
   content_type 'text/css', :charset => 'utf-8'
@@ -132,7 +132,7 @@ __END__
       $(document).ready(function() {
         $('#navigation').hide();
         $('#edit_link').hide();
-        $.hotkeys.add('Ctrl+h', function() { document.location = '/#{HOMEPAGE}' })
+        $.hotkeys.add('Ctrl+h', function() { document.location = '/#{Homepage}' })
         $.hotkeys.add('Ctrl+l', function() { document.location = '/_list' })
       })
   %body
