@@ -1,0 +1,27 @@
+#!/bin/sh
+RUBY=%s
+AS_USER=%s
+GIT_WIKI_DIR=%s
+GIT_WIKI_REPOSITORY=%s
+PID_FILE=%s
+ENVIRONMENT=%s
+SERVER=%s
+
+case "$1" in
+  start)
+    echo "Starting git-wiki"
+    start-stop-daemon --start --background --pidfile $PID_FILE \
+      --make-pidfile --chuid $AS_USER --chdir $GIT_WIKI_DIR --exec git-wiki.rb -- -e$ENVIRONMENT -s$SERVER
+    ;;
+  stop)
+    echo -n "Stopping git-wiki"
+    start-stop-daemon --stop --user simon --pidfile /var/run/git-wiki
+    ;;
+  *)
+    echo "Usage: /etc/init.d/git-wiki {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
+
