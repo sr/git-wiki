@@ -27,7 +27,7 @@ class Page
 
   def body
     BlueCloth.new(RubyPants.new(raw_body).to_html).to_html.
-      gsub(/\b((?:[A-Z]\w+){2,})/) do |page|
+      gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) do |page|
         "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknown'}' href='#{page}'>#{page}</a>"
       end
   end
