@@ -77,9 +77,7 @@ helpers do
   end
 end
 
-before do
-  content_type 'text/html', :charset => 'utf-8'
-end
+before { content_type 'text/html', :charset => 'utf-8' }
 
 get('/') { redirect '/' + Homepage }
 
@@ -98,7 +96,6 @@ get '/:page' do
   @page.tracked? ? haml(:show) : redirect("/e/#{@page.name}")
 end
 
-# Waiting for Black's new awesome route system
 get '/:page.txt' do
   @page = Page.new(params[:page])
   throw :halt, [404, "Unknown page #{params[:page]}"] unless @page.tracked?
