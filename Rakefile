@@ -1,23 +1,22 @@
 require 'rubygems'
 require 'git'
 
-desc 'Install needed submodules.'
-task :submodules do
-  puts '* Downloading sinatra and haml'
-  sh 'git submodule init'
-  sh 'git submodule update'
-end
+task :default => :bootstrap
 
 desc 'Bootstrap your wiki.'
-task :bootstrap => :submodules do
-  unless (Git.open($path) rescue false)
-    puts "* Initializing repository in #{$path}"
-    repository = Git.init($path)
-    File.open(File.join($path, $homepage), 'w') { |f|
+task :bootstrap do
+  path = ENV['GIT_WIKI_REPO'] || File.join(ENV['HOME'], 'wiki')
+  unless (Git.open(path) rescue false)
+    repository = Git.init(path)
+    File.open(File.join(path, 'Home'), 'w') { |f|
       f << File.read(__FILE__).gsub(/.*__END__/m, '')
     }
-    repository.add($homepage)
+    repository.add('Home')
     repository.commit('Initial commit')
+    puts "* Initialized the repository in #{path}"
+    puts '* If everything worked as expected, git-wiki will be avalaible at http://0.0.0.0:4567/ in a second'
+    puts
+    exec "ruby git-wiki.rb"
   end
 end
 

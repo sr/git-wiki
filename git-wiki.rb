@@ -56,7 +56,7 @@ end
 use_in_file_templates!
 
 configure do
-  GitRepository = ENV['GIT_WIKI_REPOSITORY'] || File.join(ENV['HOME'], 'wiki')
+  GitRepository = ENV['GIT_WIKI_REPO'] || File.join(ENV['HOME'], 'wiki')
   Homepage = 'Home'
   set_option :haml, :format => :html4
 
