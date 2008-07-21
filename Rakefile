@@ -1,13 +1,6 @@
 require 'rubygems'
 require 'git'
 
-$path = File.expand_path(ENV['GIT_WIKI_REPOSITORY'] || File.join(ENV['HOME'], 'wiki'))
-$homepage     = 'Home'
-$ruby         = `which ruby`.chomp
-$pid_file     = '/var/run/git-wiki'
-$server       = 'mongrel'
-$environment  = 'production'
-
 desc 'Install needed submodules.'
 task :submodules do
   puts '* Downloading sinatra and haml'
@@ -25,33 +18,6 @@ task :bootstrap => :submodules do
     }
     repository.add($homepage)
     repository.commit('Initial commit')
-  end
-end
-
-desc 'Install git-wiki as a daemon and run it at boot.'
-task :daemonize => 'daemon:at_boot' do
-  sh 'sudo /etc/init.d/git-wiki start' do |successful, _|
-    if successful
-      puts '=> Point your browser at http://0.0.0.0:4567 and start to use your wiki!'
-    else
-      'Something went wrong.'
-    end
-  end
-end
-
-namespace :daemon do
-  task :install do
-    File.open('git-wiki.d', 'w') do |f|
-      f << File.read('git-wiki.d.in') % [$ruby, ENV['USER'],
-        Dir.pwd, $path, $pid_file, $environment, $server]
-    end
-    sh 'sudo cp -f git-wiki.d /etc/init.d/git-wiki'
-    sh 'sudo chmod +x /etc/init.d/git-wiki'
-    sh 'rm git-wiki.d'
-  end
-
-  task :at_boot => :install do
-    sh 'sudo /usr/sbin/update-rc.d git-wiki defaults'
   end
 end
 

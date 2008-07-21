@@ -25,9 +25,6 @@ You need the fellowing gems:
 
 Run `rake bootstrap && ruby git-wiki.rb` and point your browser at <http://0.0.0.0:4567/>. Enjoy!
 
-You may also want to install it as a daemon. To do so, run `rake daemonize` *(only tested on Ubuntu).*
-
-
 ## Quotes
 
 <blockquote>
