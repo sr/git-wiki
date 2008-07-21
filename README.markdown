@@ -25,6 +25,22 @@ You need the fellowing gems:
 
 Run `rake bootstrap && ruby git-wiki.rb` and point your browser at <http://0.0.0.0:4567/>. Enjoy!
 
+## Licence
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2008 Simon Rozet <simon@rozet.name>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+
 ## Quotes
 
 <blockquote>
@@ -53,13 +69,6 @@ If they used git instead, the repository would be tiny, and you could make a per
 copy of the entire wiki to take on the plane with you, then sync your changes back when you're done.</p> 
 <p><cite><a href="http://www.advogato.org/person/apenwarr/diary/371.html">Git is the next Unix</a></cite></p>
 </blockquote>
-
-
-## Licence
-
-git-wiki is avalaible on [GitHub][] as well as on `git://atonie.org/git-wiki.git`
-under the [WTFPL][] license terms. That license basically
-allows you to **do what the fuck you want with it**, without any restriction.
 
 
   [Sinatra]: http://sinatrarb.com
