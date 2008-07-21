@@ -17,9 +17,10 @@ especially [al3x][]'s one.
 
 ## Install
 
-You need the fellowing gems:
+The fellowing [gems][] are required to run git-wiki:
 
-- git (as in `gem install git`)
+- haml
+- git
 - BlueCloth
 - rubypants
 
@@ -75,4 +76,4 @@ copy of the entire wiki to take on the plane with you, then sync your changes ba
   [GitHub]: http://github.com/sr/git-wiki
   [forks]: http://github.com/sr/git-wiki/network
   [al3x]: http://github.com/al3x/github
-  [WTFPL]: http://sam.zoy.org/wtfpl/
+  [gems]: http://www.rubygems.org/
