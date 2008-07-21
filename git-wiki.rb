@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
-%w(sinatra haml sass rubygems git bluecloth rubypants).each do |dependency|
-  begin
-    $: << File.expand_path(File.dirname(__FILE__) + "/vendor/#{dependency}/lib")
-    require dependency
-  rescue LoadError
-    abort "Unable to load #{dependency}. Did you run 'git submodule init' ? If so install #{dependency}"
-  end
-end
+$: << File.expand_path(File.dirname(__FILE__) + "/vendor/sinatra/lib")
+%w(sinatra
+rubygems
+git
+haml
+sass
+bluecloth
+rubypants).each { |dependency| require dependency }
 
 class Page
   class << self
