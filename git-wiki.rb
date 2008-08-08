@@ -22,7 +22,7 @@ class Page
 
   def initialize(name)
     @name = name
-    @filename = File.join(GitRepository, @name)
+    @filename = File.join(GitRepository, @name + PageExtension)
   end
 
   def body
@@ -57,6 +57,7 @@ use_in_file_templates!
 
 configure do
   GitRepository = ENV['GIT_WIKI_REPO'] || File.join(ENV['HOME'], 'wiki')
+  PageExtension = '.markdown'
   Homepage = 'Home'
   set_option :haml, :format => :html4
 
@@ -81,7 +82,7 @@ before { content_type 'text/html', :charset => 'utf-8' }
 
 get('/') { redirect '/' + Homepage }
 
-get('/_stylesheet.css') do
+get '/_stylesheet.css' do
   content_type 'text/css', :charset => 'utf-8'
   sass :stylesheet
 end
