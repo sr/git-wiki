@@ -227,7 +227,7 @@ __END__
 
 %h1 All pages
 - if @pages.empty?
-%p No pages found.
+  %p No pages found.
 - else
   %ul#pages_list
   - @pages.each_with_index do |page, index|
@@ -235,7 +235,6 @@ __END__
       %li.odd= list_item(page)
     - else
       %li.even= list_item(page)
-  - end
 
 @@ stylesheet
 body
