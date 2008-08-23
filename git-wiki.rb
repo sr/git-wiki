@@ -15,7 +15,7 @@ class Page
 
   def self.find_all
     return [] if (Page.repo.log.size rescue 0) == 0
-    Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name) }.sort_by { |p| p.name }
+    Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name.gsub(PageExtension, '')) }.sort_by { |p| p.name }
   end
 
   attr_reader :name
