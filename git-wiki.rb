@@ -40,12 +40,12 @@ class Page
     return if content == raw_body
     File.open(@filename, 'w') { |f| f << content }
     message = tracked? ? "Edited #{@name}" : "Created #{@name}"
-    Page.repo.add(@name)
+    Page.repo.add(@name + PageExtension)
     Page.repo.commit(message)
   end
 
   def tracked?
-    Page.repo.ls_files.keys.include?(@name)
+    Page.repo.ls_files.keys.include?(@name + PageExtension)
   end
 
   def to_s
