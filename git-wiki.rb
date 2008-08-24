@@ -135,11 +135,8 @@ __END__
   %head
     %title= title
     %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css'}
-    %script{:src => '/jquery-1.2.3.min.js', :type => 'text/javascript'}
-    %script{:src => '/jquery.jeditable.js', :type => 'text/javascript'}
-    %script{:src => '/jquery.autogrow.js', :type => 'text/javascript'}
-    %script{:src => '/jquery.hotkeys.js', :type => 'text/javascript'}
-    %script{:src => '/to-title-case.js', :type => 'text/javascript'}
+    - Dir[Sinatra.application.options.public + '/*.js'].reverse.each do |lib|
+      %script{:src => "/#{File.basename(lib)}", :type => 'text/javascript'}
     :javascript
       $(document).ready(function() {
         $('#navigation').hide();
