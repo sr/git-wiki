@@ -8,6 +8,22 @@ sass
 bluecloth
 rubypants).each { |dependency| require dependency }
 
+class String
+  def to_html
+    BlueCloth.new(RubyPants.new(self).to_html).to_html.linkify
+  end
+
+  def linkify
+    self.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) do |page|
+      "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknown'}' href='#{page}'>#{page.titleize}</a>"
+    end
+  end
+
+  def titleize
+    self.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
+  end
+end
+
 class Page
   class << self
     attr_accessor :repo
@@ -26,10 +42,7 @@ class Page
   end
 
   def body
-    BlueCloth.new(RubyPants.new(raw_body).to_html).to_html.
-      gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) do |page|
-        "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknown'}' href='#{page}'>#{page}</a>"
-      end
+    raw_body.to_html
   end
 
   def raw_body
@@ -69,12 +82,12 @@ end
 
 helpers do
   def title(title=nil)
-    @title = title unless title.nil?
+    @title = title.to_s unless title.nil?
     @title
   end
 
   def list_item(page)
-    "<a class='page_name' href='/#{page}'>#{page}</a>&nbsp;<a class='edit' href='/e/#{page}'>edit</a>"
+    "<a class='page_name' href='/#{page}'>#{page.name.titleize}</a>&nbsp;<a class='edit' href='/e/#{page}'>edit</a>"
   end
 end
 
@@ -126,12 +139,21 @@ __END__
     %script{:src => '/jquery.jeditable.js', :type => 'text/javascript'}
     %script{:src => '/jquery.autogrow.js', :type => 'text/javascript'}
     %script{:src => '/jquery.hotkeys.js', :type => 'text/javascript'}
+    %script{:src => '/to-title-case.js', :type => 'text/javascript'}
     :javascript
       $(document).ready(function() {
         $('#navigation').hide();
         $('#edit_link').hide();
         $.hotkeys.add('Ctrl+h', function() { document.location = '/#{Homepage}' })
         $.hotkeys.add('Ctrl+l', function() { document.location = '/_list' })
+
+        /* title-case-ification */
+        document.title = document.title.toTitleCase();
+        $('h1:first').text($('h1:first').text().toTitleCase());
+        $('a').each(function(i) {
+          var e = $(this)
+          e.text(e.text().toTitleCase());
+        })
       })
   %body
     %ul#navigation
@@ -142,7 +164,7 @@ __END__
     #content= yield
 
 @@ show
-- title @page.name
+- title @page.name.titleize
 :javascript
   $(document).ready(function() {
     $.editable.addInputType('autogrow', {
@@ -192,7 +214,7 @@ __END__
   ~"#{@page.body}"
 
 @@ edit
-- title "Editing #{@page}"
+- title "Editing #{@page.name.titleize}"
 
 %h1= title
 %form{:method => 'POST', :action => "/e/#{@page}"}
