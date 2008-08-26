@@ -5,8 +5,7 @@ rubygems
 git
 haml
 sass
-bluecloth
-rubypants).each { |dependency| require dependency }
+bluecloth).each { |dependency| require dependency }
 
 begin
   require 'thin'
@@ -16,7 +15,7 @@ end
 
 class String
   def to_html
-    BlueCloth.new(RubyPants.new(self).to_html).to_html.linkify
+    BlueCloth.new(self).to_html.linkify
   end
 
   def linkify
