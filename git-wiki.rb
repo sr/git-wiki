@@ -13,10 +13,6 @@ rescue LoadError
   puts '# May I suggest you to use Thin?'
 end
 
-module Grit
-  self.debug = true
-end
-
 class String
   def to_html
     BlueCloth.new(self).to_html.linkify
