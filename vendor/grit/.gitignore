@@ -1,0 +1,5 @@
+coverage
+pkg/*.tgz
+doc
+test/specifics.rb
+test.rb

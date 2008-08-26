@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
-$: << File.expand_path(File.dirname(__FILE__) + "/vendor/sinatra/lib")
+$:.unshift *Dir[File.dirname(__FILE__) + '/vendor/**/lib'].to_a
 %w(sinatra
+grit
 rubygems
-git
 haml
 sass
 bluecloth).each { |dependency| require dependency }
@@ -11,6 +11,10 @@ begin
   require 'thin'
 rescue LoadError
   puts '# May I suggest you to use Thin?'
+end
+
+module Grit
+  self.debug = true
 end
 
 class String
@@ -27,23 +31,26 @@ class String
   def titleize
     self.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
   end
+
+  def without_ext
+    self.sub(File.extname(self), '')
+  end
 end
 
 class Page
   class << self
     attr_accessor :repo
-  end
 
-  def self.find_all
-    return [] if (Page.repo.log.size rescue 0) == 0
-    Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name.gsub(PageExtension, '')) }.sort_by { |p| p.name }
+    def find_all
+      return [] if Page.repo.tree.contents.empty?
+      Page.repo.tree.contents.collect { |blob| Page.new(blob.name.without_ext) }
+    end
   end
 
   attr_reader :name
 
   def initialize(name)
     @name = name
-    @filename = File.join(GitRepository, @name + PageExtension)
   end
 
   def body
@@ -51,24 +58,44 @@ class Page
   end
 
   def raw_body
-    File.exists?(@filename) ? File.read(@filename) : ''
+    tracked? ? find_blob.data : ''
   end
 
   def body=(content)
     return if content == raw_body
-    File.open(@filename, 'w') { |f| f << content }
-    message = tracked? ? "Edited #{@name}" : "Created #{@name}"
-    Page.repo.add(@name + PageExtension)
-    Page.repo.commit(message)
+    File.open(file_name, 'w') { |f| f << content }
+    add_to_index_and_commit!
   end
 
   def tracked?
-    Page.repo.ls_files.keys.include?(@name + PageExtension)
+    !find_blob.nil?
   end
 
   def to_s
-    @name
+    name
   end
+
+  private
+    def find_blob
+      Page.repo.tree.contents.detect { |b| b.name == name + PageExtension }
+    end
+
+    def add_to_index_and_commit!
+      Dir.chdir(GitRepository) { Page.repo.add(base_name) }
+      Page.repo.commit_index(commit_message)
+    end
+
+    def file_name
+      File.join(GitRepository, name + PageExtension)
+    end
+
+    def base_name
+      File.basename(file_name)
+    end
+
+    def commit_message
+      tracked? ? "Edited #{name}" : "Created #{name}"
+    end
 end
 
 use_in_file_templates!
@@ -80,11 +107,12 @@ configure do
   set_option :haml,  :format        => :html4,
                      :attr_wrapper  => '"'
 
-  unless (Page.repo = Git.open(GitRepository) rescue false)
+  begin
+    Page.repo = Grit::Repo.new(GitRepository)
+  rescue Grit::InvalidGitRepositoryError, Grit::NoSuchPathError
     abort "#{GitRepository}: Not a git repository. Install your wiki with `rake bootstrap`"
   end
 end
-
 
 helpers do
   def title(title=nil)
