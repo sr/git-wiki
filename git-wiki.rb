@@ -106,7 +106,9 @@ configure do
   Homepage = 'Home'
   set_option :haml, :format => :html4
 
-  unless (Page.repo = Grit::Repo.new(GitRepository) rescue false)
+  begin
+    Page.repo = Grit::Repo.new(GitRepository)
+  rescue Grit::InvalidGitRepositoryError, Grit::NoSuchPathError
     abort "#{GitRepository}: Not a git repository. Install your wiki with `rake bootstrap`"
   end
 end
