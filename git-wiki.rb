@@ -8,6 +8,12 @@ sass
 bluecloth
 rubypants).each { |dependency| require dependency }
 
+begin
+  require 'thin'
+rescue LoadError
+  puts '# May I suggest you to use Thin?'
+end
+
 class String
   def to_html
     BlueCloth.new(RubyPants.new(self).to_html).to_html.linkify
