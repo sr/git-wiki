@@ -92,7 +92,7 @@ helpers do
   end
 
   def list_item(page)
-    "<a class='page_name' href='/#{page}'>#{page.name.titleize}</a>&nbsp;<a class='edit' href='/e/#{page}'>edit</a>"
+    "<a class='page_name' href='/#{page}'>#{page.name.titleize}</a>"
   end
 end
 
@@ -144,8 +144,6 @@ __END__
       %script{:src => "/#{File.basename(lib)}", :type => 'text/javascript'}
     :javascript
       $(document).ready(function() {
-        $('#navigation').hide();
-        $('#edit_link').hide();
         $.hotkeys.add('Ctrl+h', function() { document.location = '/#{Homepage}' })
         $.hotkeys.add('Ctrl+l', function() { document.location = '/_list' })
 
@@ -158,11 +156,6 @@ __END__
         })
       })
   %body
-    %ul#navigation
-      %li
-        %a{:href => '/'} Home
-      %li
-        %a{:href => '/_list'} List
     #content= yield
 
 @@ show
@@ -204,20 +197,14 @@ __END__
       indicator: 'Saving...',
       loadtext: '',
       cssclass: 'edit_form',
-      callback: function(v, s) {
-        /**notice = $('<p id="notice">New version successfuly saved!</p>').fadeOut('slow')
-        $('#content').prepend(notice.html())*/
-      }
     })
   })
-%a#edit_link{:href => "/e/#{@page}"} edit this page
 %h1= title
 #page_content
   ~"#{@page.body}"
 
 @@ edit
 - title "Editing #{@page.name.titleize}"
-
 %h1= title
 %form{:method => 'POST', :action => "/e/#{@page}"}
   %p
@@ -229,17 +216,16 @@ __END__
 
 @@ list
 - title "Listing pages"
-
 %h1 All pages
 - if @pages.empty?
   %p No pages found.
 - else
   %ul#pages_list
-  - @pages.each_with_index do |page, index|
-    - if (index % 2) == 0
-      %li.odd= list_item(page)
-    - else
-      %li.even= list_item(page)
+    - @pages.each_with_index do |page, index|
+      - if (index % 2) == 0
+        %li.odd=  list_item(page)
+      - else
+        %li.even= list_item(page)
 
 @@ stylesheet
 body
@@ -251,20 +237,8 @@ body
   background-color: white
   margin: 0
   padding: 0
-
-#navigation
-  padding-left: 2em
-  margin: 0
-  li
-    list-style-type: none
-    display: inline
-
 #content
   padding: 2em
-.notice
-  background-color: #ffc
-  padding: 6px
-
 a
   padding: 2px
   color: blue
@@ -279,39 +253,24 @@ a
       background-color: gray
       color: white
       text-decoration: none
-
+  &.cancel
+    color: red
+    &:hover
+      text-decoration: none
+      background-color: red
+      color: white
 textarea
   font-family: courrier
-  padding: 5px
   font-size: 14px
   line-height: 18px
-
-.edit_link
-  display: block
-  background-color: #ffc
+  padding: 5px
+button.submit
   font-weight: bold
-  text-decoration: none
-  color: black
-  &:hover
-    color: white
-    background-color: red
-
-.submit
-  font-weight: bold
-
-.cancel
-  color: red
-  &:hover
-    text-decoration: none
-    background-color: red
-    color: white
 ul#pages_list
   list-style-type: none
   margin: 0
   padding: 0
   li
     padding: 5px
-    a.edit
-      display: none 
     &.odd
       background-color: #D3D3D3
