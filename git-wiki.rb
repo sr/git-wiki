@@ -13,6 +13,10 @@ rescue LoadError
   puts '# May I suggest you to use Thin?'
 end
 
+module Grit
+  self.debug = true
+end
+
 class String
   def to_html
     BlueCloth.new(self).to_html.linkify
@@ -35,8 +39,8 @@ class Page
   end
 
   def self.find_all
-    return [] if (Page.repo.log.size rescue 0) == 0
-    Page.repo.log.first.gtree.children.map { |name, blob| Page.new(name.gsub(PageExtension, '')) }.sort_by { |p| p.name }
+    return [] if Page.repo.tree.contents.empty?
+    Page.repo.tree.contents.collect { |blob| Page.new(blob.name.gsub(PageExtension, '')) }
   end
 
   attr_reader :name
@@ -58,12 +62,14 @@ class Page
     return if content == raw_body
     File.open(@filename, 'w') { |f| f << content }
     message = tracked? ? "Edited #{@name}" : "Created #{@name}"
-    Page.repo.add(@name + PageExtension)
-    Page.repo.commit(message)
+    Dir.chdir(GitRepository) {
+      Page.repo.add(@name + PageExtension)
+    }
+    Page.repo.commit_index(message)
   end
 
   def tracked?
-    Page.repo.ls_files.keys.include?(@name + PageExtension)
+    Page.repo.tree.contents.collect { |blob| blob.name }.include?(@name + PageExtension)
   end
 
   def to_s
@@ -79,7 +85,7 @@ configure do
   Homepage = 'Home'
   set_option :haml, :format => :html4
 
-  unless (Page.repo = Git.open(GitRepository) rescue false)
+  unless (Page.repo = Grit::Repo.new(GitRepository) rescue false)
     abort "#{GitRepository}: Not a git repository. Install your wiki with `rake bootstrap`"
   end
 end
