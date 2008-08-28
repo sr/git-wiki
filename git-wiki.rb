@@ -20,7 +20,7 @@ class String
 
   def linkify
     self.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) do |page|
-      "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknown'}' href='#{page}'>#{page.titleize}</a>"
+      %Q{<a class="#{Page.new(page).to_css_class}" href="/#{page}">#{page.titleize}</a>}
     end
   end
 
@@ -33,51 +33,82 @@ class String
   end
 end
 
-class Page
-  class << self
-    attr_accessor :repo
-
-    def find_all
-      return [] if Page.repo.tree.contents.empty?
-      Page.repo.tree.contents.collect { |blob| Page.new(blob.name.without_ext) }
-    end
-  end
-
+class PageNotFound < Sinatra::NotFound
   attr_reader :name
 
   def initialize(name)
     @name = name
   end
+end
+
+class Page
+  class << self
+    attr_accessor :repo
+
+    def find_all
+      return [] if repo.tree.contents.empty?
+      repo.tree.contents.collect { |blob| new(blob) }
+    end
+
+    def find(name)
+      page_blob = find_blob(name)
+      raise PageNotFound.new(name) unless page_blob
+      new(page_blob)
+    end
+
+    def find_or_create(name)
+      find(name)
+    rescue PageNotFound
+      new(create_blob_for(name))
+    end
+
+    private
+      def find_blob(page_name)
+        repo.tree/(page_name + PageExtension)
+      end
+
+      def create_blob_for(page_name)
+        Grit::Blob.create(repo, :name => page_name + PageExtension, :data => '')
+      end
+  end
+
+  def initialize(blob)
+    @blob = blob
+  end
+
+  def new?
+    body.nil?
+  end
+
+  def name
+    @blob.name.without_ext
+  end
 
   def body
-    raw_body.to_html
+    @blob.data
   end
 
-  def raw_body
-    tracked? ? find_blob.data : ''
-  end
-
-  def body=(content)
-    return if content == raw_body
-    File.open(file_name, 'w') { |f| f << content }
+  def update_content(new_content)
+    return if new_content == content
+    File.open(file_name, 'w') { |f| f << new_content }
     add_to_index_and_commit!
   end
 
-  def tracked?
-    !find_blob.nil?
+  def to_html
+    body.linkify.to_html
   end
 
   def to_s
     name
   end
 
-  private
-    def find_blob
-      Page.repo.tree.contents.detect { |b| b.name == name + PageExtension }
-    end
+  def to_css_class
+    new? ? 'unknown' : 'exists'
+  end
 
+  private
     def add_to_index_and_commit!
-      Dir.chdir(GitRepository) { Page.repo.add(base_name) }
+      Dir.chdir(GitRepository) { Page.repo.add(@blob.name) }
       Page.repo.commit_index(commit_message)
     end
 
@@ -85,12 +116,8 @@ class Page
       File.join(GitRepository, name + PageExtension)
     end
 
-    def base_name
-      File.basename(file_name)
-    end
-
     def commit_message
-      tracked? ? "Edited #{name}" : "Created #{name}"
+      new? ? "Edited #{name}" : "Created #{name}"
     end
 end
 
@@ -108,6 +135,11 @@ configure do
   rescue Grit::InvalidGitRepositoryError, Grit::NoSuchPathError
     abort "#{GitRepository}: Not a git repository. Install your wiki with `rake bootstrap`"
   end
+end
+
+error PageNotFound do
+  page = request.env['sinatra.error'].name
+  redirect "/e/#{page}"
 end
 
 helpers do
@@ -136,26 +168,25 @@ get '/_list' do
 end
 
 get '/:page' do
-  @page = Page.new(params[:page])
-  @page.tracked? ? haml(:show) : redirect("/e/#{@page.name}")
+  @page = Page.find(params[:page])
+  haml :show
 end
 
 get '/:page.txt' do
-  @page = Page.new(params[:page])
-  throw :halt, [404, "Unknown page #{params[:page]}"] unless @page.tracked?
+  @page = Page.find(params[:page])
   content_type 'text/plain', :charset => 'utf-8'
-  @page.raw_body
+  @page.content
 end
 
 get '/e/:page' do
-  @page = Page.new(params[:page])
+  @page = Page.find_or_create(params[:page])
   haml :edit
 end
 
 post '/e/:page' do
-  @page = Page.new(params[:page])
-  @page.body = params[:body]
-  request.xhr? ? @page.body : redirect("/#{@page.name}")
+  @page = Page.find_or_create(params[:page])
+  @page.update_content(params[:body])
+  redirect "/#{@page}"
 end
 
 __END__
@@ -226,14 +257,14 @@ __END__
   })
 %h1= title
 #page_content
-  ~"#{@page.body}"
+  ~"#{@page.to_html}"
 
 @@ edit
 - title "Editing #{@page.name.titleize}"
 %h1= title
 %form{:method => 'POST', :action => "/e/#{@page}"}
   %p
-    %textarea{:name => 'body', :rows => 16, :cols => 60}= @page.raw_body
+    %textarea{:name => 'body', :rows => 20, :cols => 80}= @page.content
   %p
     %input.submit{:type => :submit, :value => 'Save as the newest version'}
     or
