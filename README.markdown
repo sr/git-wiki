@@ -71,6 +71,11 @@ copy of the entire wiki to take on the plane with you, then sync your changes ba
 <p><cite><a href="http://www.advogato.org/person/apenwarr/diary/371.html">Git is the next Unix</a></cite></p>
 </blockquote>
 
+## See also
+
+- [WiGit](http://el-tramo.be/software/wigit) – git-wiki in PHP
+- [ikiwiki](http://ikiwiki.info/) – a wiki compiler supporting git
+
 
   [Sinatra]: http://sinatrarb.com
   [GitHub]: http://github.com/sr/git-wiki
