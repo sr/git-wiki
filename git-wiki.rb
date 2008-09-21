@@ -83,6 +83,14 @@ class Page
     @blob = blob
   end
 
+  def to_html
+    content.linkify.to_html
+  end
+
+  def to_s
+    name
+  end
+
   def new?
     @blob.id.nil?
   end
@@ -91,7 +99,7 @@ class Page
     @blob.name.without_ext
   end
 
-  def body
+  def content
     @blob.data
   end
 
@@ -99,14 +107,6 @@ class Page
     return if new_content == content
     File.open(file_name, 'w') { |f| f << new_content }
     add_to_index_and_commit!
-  end
-
-  def to_html
-    body.linkify.to_html
-  end
-
-  def to_s
-    name
   end
 
   private
@@ -156,9 +156,13 @@ helpers do
   end
 end
 
-before { content_type 'text/html', :charset => 'utf-8' }
+before do
+  content_type 'text/html', :charset => 'utf-8'
+end
 
-get('/') { redirect '/' + Homepage }
+get '/' do
+  redirect '/' + Homepage
+end
 
 get '/_stylesheet.css' do
   content_type 'text/css', :charset => 'utf-8'
