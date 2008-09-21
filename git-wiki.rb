@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 $:.unshift *Dir[File.dirname(__FILE__) + '/vendor/**/lib'].to_a
-%w(sinatra
-grit
+%w(grit
 rubygems
+sinatra
 haml
 sass
 bluecloth).each { |dependency| require dependency }

@@ -19,6 +19,7 @@ especially [al3x][]'s one.
 
 The fellowing [gems][] are required to run git-wiki:
 
+- sinatra
 - haml
 - git
 - BlueCloth
