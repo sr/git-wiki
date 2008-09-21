@@ -30,20 +30,18 @@ The fellowing [gems][] are required to run git-wiki:
 Run `rake bootstrap && ruby git-wiki.rb` and point your browser at <http://0.0.0.0:4567/>. Enjoy!
 
 ## Licence
+               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                       Version 2, December 2004
 
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-                    Version 2, December 2004
+    Copyright (C) 2008 Simon Rozet <simon@rozet.name>
+    Everyone is permitted to copy and distribute verbatim or modified
+    copies of this license document, and changing it is allowed as long
+    as the name is changed.
 
- Copyright (C) 2008 Simon Rozet <simon@rozet.name>
+               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+      TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
- Everyone is permitted to copy and distribute verbatim or modified
- copies of this license document, and changing it is allowed as long
- as the name is changed.
-
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
-  0. You just DO WHAT THE FUCK YOU WANT TO.
+     0. You just DO WHAT THE FUCK YOU WANT TO.
 
 ## Quotes
 
