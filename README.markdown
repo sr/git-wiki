@@ -20,13 +20,11 @@ especially [al3x][]'s one.
 The fellowing [gems][] are required to run git-wiki:
 
 - sinatra
+- mojombo-grit
 - haml
 - git
 - BlueCloth
 - rubypants
-- mime-types
-- open4
-- diff-lcs
 
 Run `rake bootstrap && ruby git-wiki.rb` and point your browser at <http://0.0.0.0:4567/>. Enjoy!
 

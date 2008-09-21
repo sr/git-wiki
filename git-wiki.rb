@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
-$:.unshift *Dir[File.dirname(__FILE__) + '/vendor/**/lib'].to_a
-%w(grit
-rubygems
+require 'rubygems'
+gem 'mojombo-grit'
+
+%w(rubygems
 sinatra
+grit
 haml
 sass
 bluecloth).each { |dependency| require dependency }
