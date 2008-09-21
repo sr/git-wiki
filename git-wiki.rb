@@ -77,7 +77,7 @@ class Page
   end
 
   def new?
-    body.nil?
+    @blob.id.nil?
   end
 
   def name
@@ -117,7 +117,7 @@ class Page
     end
 
     def commit_message
-      new? ? "Edited #{name}" : "Created #{name}"
+      new? ? "Created #{name}" : "Updated #{name}"
     end
 end
 
