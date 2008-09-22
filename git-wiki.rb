@@ -165,7 +165,7 @@ __END__
   %head
     %title= title
     %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css'}
-    - Dir[Sinatra.application.options.public + '/*.js'].reverse.each do |lib|
+    - Dir[Sinatra.application.options.public + '/*.js'].sort.each do |lib|
       %script{:src => "/#{File.basename(lib)}", :type => 'text/javascript'}
     :javascript
       $(document).ready(function() {
