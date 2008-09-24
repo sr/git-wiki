@@ -7,7 +7,7 @@ sinatra
 grit
 haml
 sass
-bluecloth).each { |dependency| require dependency }
+redcloth).each { |dependency| require dependency }
 
 begin
   require 'thin'
@@ -17,7 +17,7 @@ end
 
 class String
   def to_html
-    BlueCloth.new(self).to_html
+    RedCloth.new(self).to_html
   end
 
   def linkify
@@ -130,7 +130,7 @@ use_in_file_templates!
 
 configure do
   GitRepository = ENV['GIT_WIKI_REPO'] || File.join(ENV['HOME'], 'wiki')
-  PageExtension = '.markdown'
+  PageExtension = '.textile'
   Homepage = 'Home'
   set_option :haml,  :format        => :html4,
                      :attr_wrapper  => '"'
