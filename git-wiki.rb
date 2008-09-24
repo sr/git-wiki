@@ -223,7 +223,7 @@ __END__
   $(document).ready(function() {
     $.hotkeys.add('Ctrl+e', function() { document.location = '/e/#{@page}' })
   })
-%h1= title
+%h1#page_title= title
 #page_content
   ~"#{@page.to_html}"
 
@@ -232,7 +232,7 @@ __END__
 %h1= title
 %form{:method => 'POST', :action => "/e/#{@page}"}
   %p
-    %textarea{:name => 'body', :rows => 20, :cols => 80}= @page.content
+    %textarea{:name => 'body'}= @page.content
   %p
     %input.submit{:type => :submit, :value => 'Save as the newest version'}
     or
@@ -240,7 +240,7 @@ __END__
 
 @@ list
 - title "Listing pages"
-%h1 All pages
+%h1#page_title All pages
 - if @pages.empty?
   %p No pages found.
 - else
@@ -259,10 +259,18 @@ body
     color: black
   line-height: 160%
   background-color: white
-  margin: 0
+  margin: 0 10px
   padding: 0
-#content
-  padding: 2em
+h1#page_title
+  font-size: xx-large
+  text-align: center
+  padding: .9em
+h1
+  font-size: x-large
+h2
+  font-size: large
+h3
+  font-size: medium
 a
   padding: 2px
   color: blue
@@ -283,13 +291,43 @@ a
       text-decoration: none
       background-color: red
       color: white
+blockquote
+  background-color: #f9f9f9
+  padding: 5px 5px
+  margin: 0
+  margin-bottom: 2em
+  outline: #eee solid 1px
+  font-size: 0.9em
+  cite
+    font-weight: bold
+    padding-left: 2em
+code
+  background-color: #eee
+  font-size: smaller
+pre
+  padding: 5px 5px
+  overflow: auto
+  font-family: fixed
+  line-height: 1em
+  border-right: 1px solid #ccc
+  border-bottom: 1px solid #ccc
+  background-color: #eee
 textarea
   font-family: courrier
-  font-size: 14px
+  font-size: .9em
+  border: 2px solid #ccc
+  display: block
+  padding: .5em
+  height: 37em
+  width: 100%
   line-height: 18px
-  padding: 5px
-button.submit
+input.submit
   font-weight: bold
+
+#content
+  max-width: 48em
+  margin: auto
+  padding: 2em
 ul#pages_list
   list-style-type: none
   margin: 0
@@ -298,3 +336,10 @@ ul#pages_list
     padding: 5px
     &.odd
       background-color: #D3D3D3
+    a
+      text-decoration: none
+.highlight
+  background-color: #f8ec11
+.done
+  font-size: x-small
+  color: #999
