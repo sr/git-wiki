@@ -179,12 +179,6 @@ get '/:page' do
   haml :show
 end
 
-get '/:page.txt' do
-  @page = Page.find(params[:page])
-  content_type 'text/plain', :charset => 'utf-8'
-  @page.content
-end
-
 get '/e/:page' do
   @page = Page.find_or_create(params[:page])
   haml :edit
@@ -225,42 +219,7 @@ __END__
 - title @page.name.titleize
 :javascript
   $(document).ready(function() {
-    $.editable.addInputType('autogrow', {
-      element : function(settings, original) {
-        var textarea = $('<textarea>');
-        if (settings.rows) {
-          textarea.attr('rows', settings.rows);
-        } else {
-          textarea.height(settings.height);
-        }
-        if (settings.cols) {
-          textarea.attr('cols', settings.cols);
-        } else {
-          textarea.width(settings.width);
-        }
-        $(this).append(textarea);
-        return(textarea);
-      },
-      plugin : function(settings, original) {
-        $('textarea', this).autogrow(settings.autogrow);
-      }
-    });
-
-    $('#page_content').editable('/e/#{@page}', {
-      loadurl: '/#{@page}.txt',
-      submit: '<button class="submit" type="submit">Save as the newest version</button>',
-      cancel: '<a class="cancel" href="" style="margin-left: 5px;">cancel</a>',
-      event: 'dblclick',
-      type: 'autogrow',
-      cols: 84,
-      rows: 20,
-      name: 'body',
-      onblur: 'ignore',
-      tooltip: ' ',
-      indicator: 'Saving...',
-      loadtext: '',
-      cssclass: 'edit_form',
-    })
+    $.hotkeys.add('Ctrl+e', function() { document.location = '/e/#{@page}' })
   })
 %h1= title
 #page_content
