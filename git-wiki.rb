@@ -20,7 +20,11 @@ class String
     RedCloth.new(self).to_html
   end
 
-  def linkify
+  def auto_link
+    self.gsub(/<((https?|ftp|irc):[^'">\s]+)>/xi, %Q{<a href="\\1">\\1</a>})
+  end
+
+  def wiki_link
     self.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) do |page|
       %Q{<a class="#{Page.css_class_for(page)}" href="/#{page}">#{page.titleize}</a>}
     end
@@ -86,7 +90,7 @@ class Page
   end
 
   def to_html
-    content.linkify.to_html
+    content.auto_link.wiki_link.to_html
   end
 
   def to_s
