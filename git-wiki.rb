@@ -199,8 +199,9 @@ __END__
   %head
     %title= title
     %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css'}
-    - Dir[Sinatra.application.options.public + '/*.js'].reverse.each do |lib|
-      %script{:src => "/#{File.basename(lib)}", :type => 'text/javascript'}
+    %script{:src => '/jquery-1.2.3.min.js', :type => 'text/javascript'}
+    %script{:src => '/jquery.hotkeys.js', :type => 'text/javascript'}
+    %script{:src => '/to-title-case.js', :type => 'text/javascript'}
     :javascript
       $(document).ready(function() {
         $.hotkeys.add('Ctrl+h', function() { document.location = '/#{Homepage}' })
