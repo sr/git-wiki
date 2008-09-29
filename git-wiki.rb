@@ -135,6 +135,12 @@ configure do
   set_option :haml,  :format        => :html4,
                      :attr_wrapper  => '"'
 
+  RedCloth::Formatters::HTML.module_eval do
+    def br(opts)
+      '<br>'
+    end
+  end
+
   begin
     Page.repo = Grit::Repo.new(GitRepository)
   rescue Grit::InvalidGitRepositoryError, Grit::NoSuchPathError
