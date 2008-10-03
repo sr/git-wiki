@@ -2,8 +2,7 @@
 require 'rubygems'
 gem 'mojombo-grit'
 
-%w(rubygems
-sinatra
+%w(sinatra
 grit
 haml
 sass
