@@ -19,13 +19,12 @@ especially [al3x][]'s one.
 
 The fellowing [gems][] are required to run git-wiki:
 
+- sinatra
+- mojombo-grit
 - haml
 - git
 - BlueCloth
 - rubypants
-- mime-types
-- open4
-- diff-lcs
 
 Run `rake bootstrap && ruby git-wiki.rb` and point your browser at <http://0.0.0.0:4567/>. Enjoy!
 
@@ -71,6 +70,11 @@ If they used git instead, the repository would be tiny, and you could make a per
 copy of the entire wiki to take on the plane with you, then sync your changes back when you're done.</p> 
 <p><cite><a href="http://www.advogato.org/person/apenwarr/diary/371.html">Git is the next Unix</a></cite></p>
 </blockquote>
+
+## See also
+
+- [WiGit](http://el-tramo.be/software/wigit) – git-wiki in PHP
+- [ikiwiki](http://ikiwiki.info/) – a wiki compiler supporting git
 
 
   [Sinatra]: http://sinatrarb.com

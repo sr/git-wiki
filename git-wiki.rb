@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
-$:.unshift *Dir[File.dirname(__FILE__) + '/vendor/**/lib'].to_a
+require 'rubygems'
+gem 'mojombo-grit'
+
 %w(sinatra
 grit
-rubygems
 haml
 sass
-bluecloth).each { |dependency| require dependency }
+redcloth).each { |dependency| require dependency }
 
 begin
   require 'thin'
@@ -15,12 +16,16 @@ end
 
 class String
   def to_html
-    BlueCloth.new(self).to_html.linkify
+    RedCloth.new(self).to_html
   end
 
-  def linkify
+  def auto_link
+    self.gsub(/<((https?|ftp|irc):[^'">\s]+)>/xi, %Q{<a href="\\1">\\1</a>})
+  end
+
+  def wiki_link
     self.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) do |page|
-      "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknown'}' href='#{page}'>#{page.titleize}</a>"
+      %Q{<a class="#{Page.css_class_for(page)}" href="/#{page}">#{page.titleize}</a>}
     end
   end
 
@@ -33,51 +38,85 @@ class String
   end
 end
 
-class Page
-  class << self
-    attr_accessor :repo
-
-    def find_all
-      return [] if Page.repo.tree.contents.empty?
-      Page.repo.tree.contents.collect { |blob| Page.new(blob.name.without_ext) }
-    end
-  end
-
+class PageNotFound < Sinatra::NotFound
   attr_reader :name
 
   def initialize(name)
     @name = name
   end
+end
 
-  def body
-    raw_body.to_html
+class Page
+  class << self
+    attr_accessor :repo
+
+    def find_all
+      return [] if repo.tree.contents.empty?
+      repo.tree.contents.collect { |blob| new(blob) }
+    end
+
+    def find(name)
+      page_blob = find_blob(name)
+      raise PageNotFound.new(name) unless page_blob
+      new(page_blob)
+    end
+
+    def find_or_create(name)
+      find(name)
+    rescue PageNotFound
+      new(create_blob_for(name))
+    end
+
+    def css_class_for(name)
+      find(name)
+      'exists'
+    rescue PageNotFound
+      'unknown'
+    end
+
+    private
+      def find_blob(page_name)
+        repo.tree/(page_name + PageExtension)
+      end
+
+      def create_blob_for(page_name)
+        Grit::Blob.create(repo, :name => page_name + PageExtension, :data => '')
+      end
   end
 
-  def raw_body
-    tracked? ? find_blob.data : ''
+  def initialize(blob)
+    @blob = blob
   end
 
-  def body=(content)
-    return if content == raw_body
-    File.open(file_name, 'w') { |f| f << content }
-    add_to_index_and_commit!
-  end
-
-  def tracked?
-    !find_blob.nil?
+  def to_html
+    content.auto_link.wiki_link.to_html
   end
 
   def to_s
     name
   end
 
-  private
-    def find_blob
-      Page.repo.tree.contents.detect { |b| b.name == name + PageExtension }
-    end
+  def new?
+    @blob.id.nil?
+  end
 
+  def name
+    @blob.name.without_ext
+  end
+
+  def content
+    @blob.data
+  end
+
+  def update_content(new_content)
+    return if new_content == content
+    File.open(file_name, 'w') { |f| f << new_content }
+    add_to_index_and_commit!
+  end
+
+  private
     def add_to_index_and_commit!
-      Dir.chdir(GitRepository) { Page.repo.add(base_name) }
+      Dir.chdir(GitRepository) { Page.repo.add(@blob.name) }
       Page.repo.commit_index(commit_message)
     end
 
@@ -85,12 +124,8 @@ class Page
       File.join(GitRepository, name + PageExtension)
     end
 
-    def base_name
-      File.basename(file_name)
-    end
-
     def commit_message
-      tracked? ? "Edited #{name}" : "Created #{name}"
+      new? ? "Created #{name}" : "Updated #{name}"
     end
 end
 
@@ -98,16 +133,27 @@ use_in_file_templates!
 
 configure do
   GitRepository = ENV['GIT_WIKI_REPO'] || File.join(ENV['HOME'], 'wiki')
-  PageExtension = '.markdown'
+  PageExtension = '.textile'
   Homepage = 'Home'
   set_option :haml,  :format        => :html4,
                      :attr_wrapper  => '"'
+
+  RedCloth::Formatters::HTML.module_eval do
+    def br(opts)
+      '<br>'
+    end
+  end
 
   begin
     Page.repo = Grit::Repo.new(GitRepository)
   rescue Grit::InvalidGitRepositoryError, Grit::NoSuchPathError
     abort "#{GitRepository}: Not a git repository. Install your wiki with `rake bootstrap`"
   end
+end
+
+error PageNotFound do
+  page = request.env['sinatra.error'].name
+  redirect "/e/#{page}"
 end
 
 helpers do
@@ -121,9 +167,13 @@ helpers do
   end
 end
 
-before { content_type 'text/html', :charset => 'utf-8' }
+before do
+  content_type 'text/html', :charset => 'utf-8'
+end
 
-get('/') { redirect '/' + Homepage }
+get '/' do
+  redirect '/' + Homepage
+end
 
 get '/_stylesheet.css' do
   content_type 'text/css', :charset => 'utf-8'
@@ -136,26 +186,19 @@ get '/_list' do
 end
 
 get '/:page' do
-  @page = Page.new(params[:page])
-  @page.tracked? ? haml(:show) : redirect("/e/#{@page.name}")
-end
-
-get '/:page.txt' do
-  @page = Page.new(params[:page])
-  throw :halt, [404, "Unknown page #{params[:page]}"] unless @page.tracked?
-  content_type 'text/plain', :charset => 'utf-8'
-  @page.raw_body
+  @page = Page.find(params[:page])
+  haml :show
 end
 
 get '/e/:page' do
-  @page = Page.new(params[:page])
+  @page = Page.find_or_create(params[:page])
   haml :edit
 end
 
 post '/e/:page' do
-  @page = Page.new(params[:page])
-  @page.body = params[:body]
-  request.xhr? ? @page.body : redirect("/#{@page.name}")
+  @page = Page.find_or_create(params[:page])
+  @page.update_content(params[:body])
+  redirect "/#{@page}"
 end
 
 __END__
@@ -165,8 +208,9 @@ __END__
   %head
     %title= title
     %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css'}
-    - Dir[Sinatra.application.options.public + '/*.js'].sort.each do |lib|
-      %script{:src => "/#{File.basename(lib)}", :type => 'text/javascript'}
+    %script{:src => '/jquery-1.2.3.min.js', :type => 'text/javascript'}
+    %script{:src => '/jquery.hotkeys.js', :type => 'text/javascript'}
+    %script{:src => '/to-title-case.js', :type => 'text/javascript'}
     :javascript
       $(document).ready(function() {
         $.hotkeys.add('Ctrl+h', function() { document.location = '/#{Homepage}' })
@@ -187,53 +231,18 @@ __END__
 - title @page.name.titleize
 :javascript
   $(document).ready(function() {
-    $.editable.addInputType('autogrow', {
-      element : function(settings, original) {
-        var textarea = $('<textarea>');
-        if (settings.rows) {
-          textarea.attr('rows', settings.rows);
-        } else {
-          textarea.height(settings.height);
-        }
-        if (settings.cols) {
-          textarea.attr('cols', settings.cols);
-        } else {
-          textarea.width(settings.width);
-        }
-        $(this).append(textarea);
-        return(textarea);
-      },
-      plugin : function(settings, original) {
-        $('textarea', this).autogrow(settings.autogrow);
-      }
-    });
-
-    $('#page_content').editable('/e/#{@page}', {
-      loadurl: '/#{@page}.txt',
-      submit: '<button class="submit" type="submit">Save as the newest version</button>',
-      cancel: '<a class="cancel" href="" style="margin-left: 5px;">cancel</a>',
-      event: 'dblclick',
-      type: 'autogrow',
-      cols: 84,
-      rows: 20,
-      name: 'body',
-      onblur: 'ignore',
-      tooltip: ' ',
-      indicator: 'Saving...',
-      loadtext: '',
-      cssclass: 'edit_form',
-    })
+    $.hotkeys.add('Ctrl+e', function() { document.location = '/e/#{@page}' })
   })
-%h1= title
+%h1#page_title= title
 #page_content
-  ~"#{@page.body}"
+  ~"#{@page.to_html}"
 
 @@ edit
 - title "Editing #{@page.name.titleize}"
 %h1= title
 %form{:method => 'POST', :action => "/e/#{@page}"}
   %p
-    %textarea{:name => 'body', :rows => 16, :cols => 60}= @page.raw_body
+    %textarea{:name => 'body'}= @page.content
   %p
     %input.submit{:type => :submit, :value => 'Save as the newest version'}
     or
@@ -241,7 +250,7 @@ __END__
 
 @@ list
 - title "Listing pages"
-%h1 All pages
+%h1#page_title All pages
 - if @pages.empty?
   %p No pages found.
 - else
@@ -260,10 +269,18 @@ body
     color: black
   line-height: 160%
   background-color: white
-  margin: 0
+  margin: 0 10px
   padding: 0
-#content
-  padding: 2em
+h1#page_title
+  font-size: xx-large
+  text-align: center
+  padding: .9em
+h1
+  font-size: x-large
+h2
+  font-size: large
+h3
+  font-size: medium
 a
   padding: 2px
   color: blue
@@ -284,13 +301,43 @@ a
       text-decoration: none
       background-color: red
       color: white
+blockquote
+  background-color: #f9f9f9
+  padding: 5px 5px
+  margin: 0
+  margin-bottom: 2em
+  outline: #eee solid 1px
+  font-size: 0.9em
+  cite
+    font-weight: bold
+    padding-left: 2em
+code
+  background-color: #eee
+  font-size: smaller
+pre
+  padding: 5px 5px
+  overflow: auto
+  font-family: fixed
+  line-height: 1em
+  border-right: 1px solid #ccc
+  border-bottom: 1px solid #ccc
+  background-color: #eee
 textarea
   font-family: courrier
-  font-size: 14px
+  font-size: .9em
+  border: 2px solid #ccc
+  display: block
+  padding: .5em
+  height: 37em
+  width: 100%
   line-height: 18px
-  padding: 5px
-button.submit
+input.submit
   font-weight: bold
+
+#content
+  max-width: 48em
+  margin: auto
+  padding: 2em
 ul#pages_list
   list-style-type: none
   margin: 0
@@ -299,3 +346,10 @@ ul#pages_list
     padding: 5px
     &.odd
       background-color: #D3D3D3
+    a
+      text-decoration: none
+.highlight
+  background-color: #f8ec11
+.done
+  font-size: x-small
+  color: #999
