@@ -353,3 +353,16 @@ ul#pages_list
 .done
   font-size: x-small
   color: #999
+table
+  text-align: center
+  width: 100%
+  border: none
+  border-collapse: collapse
+  border-spacing: 0px
+th
+  color: #FFF
+  background-color: #3F3F3F
+  border-bottom: 1px solid black
+  padding: 2px
+tr
+  border-bottom: 1px solid black
