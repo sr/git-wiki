@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
-require 'rubygems'
-gem 'mojombo-grit'
+require "rubygems"
+gem "mojombo-grit"
 
 %w(sinatra
 grit
@@ -9,9 +9,9 @@ sass
 redcloth).each { |dependency| require dependency }
 
 begin
-  require 'thin'
+  require "thin"
 rescue LoadError
-  puts '# May I suggest you to use Thin?'
+  puts "# May I suggest you to use Thin?"
 end
 
 class String
@@ -48,7 +48,8 @@ end
 
 class Page
   class << self
-    attr_accessor :repo
+    attr_accessor :repository
+    attr_accessor :extension
 
     def find_all
       return [] if repo.tree.contents.empty?
@@ -69,18 +70,18 @@ class Page
 
     def css_class_for(name)
       find(name)
-      'exists'
+      "exists"
     rescue PageNotFound
-      'unknown'
+      "unknown"
     end
 
     private
       def find_blob(page_name)
-        repo.tree/(page_name + PageExtension)
+        repository.tree/(page_name + extension)
       end
 
       def create_blob_for(page_name)
-        Grit::Blob.create(repo, :name => page_name + PageExtension, :data => '')
+        Grit::Blob.create(repository, :name => page_name + extension, :data => "")
       end
   end
 
@@ -110,18 +111,18 @@ class Page
 
   def update_content(new_content)
     return if new_content == content
-    File.open(file_name, 'w') { |f| f << new_content }
+    File.open(file_name, "w") { |f| f << new_content }
     add_to_index_and_commit!
   end
 
   private
     def add_to_index_and_commit!
-      Dir.chdir(GitRepository) { Page.repo.add(@blob.name) }
+      Dir.chdir(self.class.repository) { self.class.repository.add(@blob.name) }
       Page.repo.commit_index(commit_message)
     end
 
     def file_name
-      File.join(GitRepository, name + PageExtension)
+      File.join(self.class.repository, name + self.class.extension)
     end
 
     def commit_message
@@ -132,20 +133,16 @@ end
 use_in_file_templates!
 
 configure do
-  GitRepository = ENV['GIT_WIKI_REPO'] || File.join(ENV['HOME'], 'wiki')
-  PageExtension = '.textile'
-  Homepage = 'Home'
+  GitRepository = ENV["GIT_WIKI_REPO"] || File.join(ENV["HOME"], "wiki")
+  Homepage = "Home"
   set_option :haml,  :format => :html5, :attr_wrapper  => '"'
 
-  begin
-    Page.repo = Grit::Repo.new(GitRepository)
-  rescue Grit::InvalidGitRepositoryError, Grit::NoSuchPathError
-    abort "#{GitRepository}: Not a git repository. Install your wiki with `rake bootstrap`"
-  end
+  Page.repository = Grit::Repo.new(GitRepository)
+  Page.extension  = ".textile"
 end
 
 error PageNotFound do
-  page = request.env['sinatra.error'].name
+  page = request.env["sinatra.error"].name
   redirect "/e/#{page}"
 end
 
@@ -156,39 +153,39 @@ helpers do
   end
 
   def list_item(page)
-    '<a class="page_name" href="/%s">%s</a>' % [page, page.name.titleize]
+    %Q{<a class="page_name" href="/#{page}">#{page.name.titleize}</a>}
   end
 end
 
 before do
-  content_type 'text/html', :charset => 'utf-8'
+  content_type "text/html", :charset => "utf-8"
 end
 
-get '/' do
-  redirect '/' + Homepage
+get "/" do
+  redirect "/" + Homepage
 end
 
-get '/_stylesheet.css' do
-  content_type 'text/css', :charset => 'utf-8'
+get "/_stylesheet.css" do
+  content_type "text/css", :charset => "utf-8"
   sass :stylesheet
 end
 
-get '/_list' do
+get "/_list" do
   @pages = Page.find_all
   haml :list
 end
 
-get '/:page' do
+get "/:page" do
   @page = Page.find(params[:page])
   haml :show
 end
 
-get '/e/:page' do
+get "/e/:page" do
   @page = Page.find_or_create(params[:page])
   haml :edit
 end
 
-post '/e/:page' do
+post "/e/:page" do
   @page = Page.find_or_create(params[:page])
   @page.update_content(params[:body])
   redirect "/#{@page}"
