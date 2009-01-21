@@ -15,26 +15,8 @@ rescue LoadError
 end
 
 class String
-  def to_html
-    RedCloth.new(self).to_html
-  end
-
-  def auto_link
-    self.gsub(/<((https?|ftp|irc):[^'">\s]+)>/xi, %Q{<a href="\\1">\\1</a>})
-  end
-
-  def wiki_link
-    self.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) do |page|
-      %Q{<a class="#{Page.css_class_for(page)}" href="/#{page}">#{page.titleize}</a>}
-    end
-  end
-
   def titleize
     self.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
-  end
-
-  def without_ext
-    self.sub(File.extname(self), '')
   end
 end
 
@@ -52,8 +34,8 @@ class Page
     attr_accessor :extension
 
     def find_all
-      return [] if repo.tree.contents.empty?
-      repo.tree.contents.collect { |blob| new(blob) }
+      return [] if repository.tree.contents.empty?
+      repository.tree.contents.collect { |blob| new(blob) }
     end
 
     def find(name)
@@ -90,7 +72,8 @@ class Page
   end
 
   def to_html
-    content.auto_link.wiki_link.to_html
+    linked = auto_link(wiki_link(content))
+    RedCloth.new(linked).to_html
   end
 
   def to_s
@@ -102,7 +85,7 @@ class Page
   end
 
   def name
-    @blob.name.without_ext
+    @blob.name.delete(File.extname(@blob.name))
   end
 
   def content
@@ -117,16 +100,26 @@ class Page
 
   private
     def add_to_index_and_commit!
-      Dir.chdir(self.class.repository) { self.class.repository.add(@blob.name) }
-      Page.repo.commit_index(commit_message)
+      Dir.chdir(self.class.repository.path) { self.class.repository.add(@blob.name) }
+      self.class.repository.commit_index(commit_message)
     end
 
     def file_name
-      File.join(self.class.repository, name + self.class.extension)
+      File.join(self.class.repository.path, name + self.class.extension)
     end
 
     def commit_message
       new? ? "Created #{name}" : "Updated #{name}"
+    end
+
+    def auto_link(string)
+      string.gsub(/<((https?|ftp|irc):[^'">\s]+)>/xi, %Q{<a href="\\1">\\1</a>})
+    end
+
+    def wiki_link(string)
+      string.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) { |page|
+        %Q{<a class="#{self.class.css_class_for(page)}" href="/#{page}">#{page.titleize}</a>}
+      }
     end
 end
 
