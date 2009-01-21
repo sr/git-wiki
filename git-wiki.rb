@@ -135,14 +135,7 @@ configure do
   GitRepository = ENV['GIT_WIKI_REPO'] || File.join(ENV['HOME'], 'wiki')
   PageExtension = '.textile'
   Homepage = 'Home'
-  set_option :haml,  :format        => :html4,
-                     :attr_wrapper  => '"'
-
-  RedCloth::Formatters::HTML.module_eval do
-    def br(opts)
-      '<br>'
-    end
-  end
+  set_option :haml,  :format => :html5, :attr_wrapper  => '"'
 
   begin
     Page.repo = Grit::Repo.new(GitRepository)
@@ -203,7 +196,7 @@ end
 
 __END__
 @@ layout
-!!! strict
+!!!
 %html
   %head
     %title= title
