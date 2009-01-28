@@ -1,16 +1,9 @@
-#!/usr/bin/env ruby
 require "rubygems"
 gem "mojombo-grit"
 
 require "sinatra/base"
 require "grit"
-require "redcloth"
-
-class String
-  def titleize
-    self.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
-  end
-end
+require "bluecloth"
 
 module GitWiki
   class << self
@@ -85,7 +78,7 @@ module GitWiki
 
     def to_html
       linked = auto_link(wiki_link(content))
-      RedCloth.new(linked).to_html
+      BlueCloth.new(linked).to_html
     end
 
     def to_s
@@ -133,7 +126,7 @@ module GitWiki
       def wiki_link(str)
         str.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) { |page|
           %Q{<a class="#{self.class.css_class_for(page)}"} +
-            %Q{href="/#{page}">#{page.titleize}</a>}
+            %Q{href="/#{page}">#{page}</a>}
         }
       end
   end
@@ -156,11 +149,6 @@ module GitWiki
 
     get "/" do
       redirect "/" + GitWiki.homepage
-    end
-
-    get "/_stylesheet.css" do
-      content_type "text/css", :charset => "utf-8"
-      sass :stylesheet
     end
 
     get "/_list" do
@@ -191,7 +179,7 @@ module GitWiki
       end
 
       def list_item(page)
-        %Q{<a class="page_name" href="/#{page}">#{page.name.titleize}</a>}
+        %Q{<a class="page_name" href="/#{page}">#{page.name}</a>}
       end
   end
 end
@@ -202,162 +190,39 @@ __END__
 %html
   %head
     %title= title
-    %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css'}
-    %script{:src => '/jquery-1.2.3.min.js', :type => 'text/javascript'}
-    %script{:src => '/jquery.hotkeys.js', :type => 'text/javascript'}
-    %script{:src => '/to-title-case.js', :type => 'text/javascript'}
-    :javascript
-      $(document).ready(function() {
-        $.hotkeys.add('Ctrl+h', function(){document.location = '/#{GitWiki.homepage}'})
-        $.hotkeys.add('Ctrl+l', function(){document.location = '/_list'})
-
-        /* title-case-ification */
-        document.title = document.title.toTitleCase();
-        $('h1:first').text($('h1:first').text().toTitleCase());
-        $('a').each(function(i) {
-          var e = $(this)
-          e.text(e.text().toTitleCase());
-        })
-      })
   %body
+    %ul
+      %li
+        %a{ :href => "/#{GitWiki.homepage}" } Home
+      %li
+        %a{ :href => "/_list" } All pages
     #content= yield
 
 @@ show
-- title @page.name.titleize
-:javascript
-  $(document).ready(function() {
-    $.hotkeys.add('Ctrl+e', function(){document.location = '/e/#{@page}'})
-  })
-%h1#page_title= title
-#page_content
+- title @page.name
+#edit
+  %a{:href => "/e/#{@page}"} Edit this page
+%h1= title
+#content
   ~"#{@page.to_html}"
 
 @@ edit
-- title "Editing #{@page.name.titleize}"
+- title "Editing #{@page.name}"
 %h1= title
 %form{:method => 'POST', :action => "/e/#{@page}"}
   %p
-    %textarea{:name => 'body'}= @page.content
+    %textarea{:name => 'body', :rows => 30, :style => "width: 100%"}= @page.content
   %p
-    %input.submit{:type => :submit, :value => 'Save as the newest version'}
+    %input.submit{:type => :submit, :value => "Save as the newest version"}
     or
     %a.cancel{:href=>"/#{@page}"} cancel
 
 @@ list
 - title "Listing pages"
-%h1#page_title All pages
+%h1 All pages
 - if @pages.empty?
   %p No pages found.
 - else
-  %ul#pages_list
-    - @pages.each_with_index do |page, index|
-      - if (index % 2) == 0
-        %li.odd=  list_item(page)
-      - else
-        %li.even= list_item(page)
-
-@@ stylesheet
-body
-  :font
-    family: "Lucida Grande", Verdana, Arial, Bitstream Vera Sans, Helvetica, sans-serif
-    size: 14px
-    color: black
-  line-height: 160%
-  background-color: white
-  margin: 0 10px
-  padding: 0
-h1#page_title
-  font-size: xx-large
-  text-align: center
-  padding: .9em
-h1
-  font-size: x-large
-h2
-  font-size: large
-h3
-  font-size: medium
-a
-  padding: 2px
-  color: blue
-  &.exists
-    &:hover
-      background-color: blue
-      text-decoration: none
-      color: white
-  &.unknown
-    color: gray
-    &:hover
-      background-color: gray
-      color: white
-      text-decoration: none
-  &.cancel
-    color: red
-    &:hover
-      text-decoration: none
-      background-color: red
-      color: white
-blockquote
-  background-color: #f9f9f9
-  padding: 5px 5px
-  margin: 0
-  margin-bottom: 2em
-  outline: #eee solid 1px
-  font-size: 0.9em
-  cite
-    font-weight: bold
-    padding-left: 2em
-code
-  background-color: #eee
-  font-size: smaller
-pre
-  padding: 5px 5px
-  overflow: auto
-  font-family: fixed
-  line-height: 1em
-  border-right: 1px solid #ccc
-  border-bottom: 1px solid #ccc
-  background-color: #eee
-textarea
-  font-family: courrier
-  font-size: .9em
-  border: 2px solid #ccc
-  display: block
-  padding: .5em
-  height: 37em
-  width: 100%
-  line-height: 18px
-input.submit
-  font-weight: bold
-
-#content
-  max-width: 48em
-  margin: auto
-  padding: 2em
-ul#pages_list
-  list-style-type: none
-  margin: 0
-  padding: 0
-  li
-    padding: 5px
-    &.odd
-      background-color: #D3D3D3
-    a
-      text-decoration: none
-.highlight
-  background-color: #f8ec11
-.done
-  font-size: x-small
-  color: #999
-table
-  text-align: center
-  width: 100%
-  border: none
-  border-collapse: collapse
-  border-spacing: 0px
-th
-  color: #FFF
-  background-color: #3F3F3F
-  border-bottom: 1px solid black
-  padding: 2px
-tr
-  border-bottom: 1px solid black
+  %ul#list
+    - @pages.each do |page|
+      %li= list_item(page)
