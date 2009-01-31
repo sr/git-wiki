@@ -151,9 +151,14 @@ module GitWiki
       redirect "/" + GitWiki.homepage
     end
 
-    get "/_list" do
+    get "/pages" do
       @pages = Page.find_all
       haml :list
+    end
+
+    get "/:page/edit" do
+      @page = Page.find_or_create(params[:page])
+      haml :edit
     end
 
     get "/:page" do
@@ -161,12 +166,7 @@ module GitWiki
       haml :show
     end
 
-    get "/e/:page" do
-      @page = Page.find_or_create(params[:page])
-      haml :edit
-    end
-
-    post "/e/:page" do
+    post "/:page" do
       @page = Page.find_or_create(params[:page])
       @page.update_content(params[:body])
       redirect "/#{@page}"
@@ -195,13 +195,13 @@ __END__
       %li
         %a{ :href => "/#{GitWiki.homepage}" } Home
       %li
-        %a{ :href => "/_list" } All pages
+        %a{ :href => "/pages" } All pages
     #content= yield
 
 @@ show
 - title @page.name
 #edit
-  %a{:href => "/e/#{@page}"} Edit this page
+  %a{:href => "/#{@page}/edit"} Edit this page
 %h1= title
 #content
   ~"#{@page.to_html}"
@@ -209,7 +209,7 @@ __END__
 @@ edit
 - title "Editing #{@page.name}"
 %h1= title
-%form{:method => 'POST', :action => "/e/#{@page}"}
+%form{:method => 'POST', :action => "/#{@page}"}
   %p
     %textarea{:name => 'body', :rows => 30, :style => "width: 100%"}= @page.content
   %p
