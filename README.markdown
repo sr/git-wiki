@@ -5,8 +5,8 @@ git-wiki is a wiki that relies on git to keep pages' history
 and [Sinatra][] to serve them.
 
 I wrote git-wiki as a quick and dirty hack, mostly to play with Sinatra.
-It turned out that Sinatra is an awesome little web framework and that this hack
-isn't as useless as I first though since I now use it daily.
+It turned out that Sinatra is an awesome little web framework and that this
+hack isn't as useless as I first though since I now use it daily.
 
 However, it is definitely not feature rich and will probably never be because
 I mostly use it as a web frontend for `git`, `ls` and `vim`.
@@ -19,12 +19,10 @@ especially [al3x][]'s one.
 
 The fellowing [gems][] are required to run git-wiki:
 
-- sinatra
-- mojombo-grit
-- haml
-- git
-- BlueCloth
-- rubypants
+- [Sinatra][]
+- [mojombo-grit](http://github.com/mojombo/grit)
+- [HAML](http://haml.hamptoncatlin.com)
+- [RDiscount](http://github.com/rtomayko/rdiscount)
 
 Run with `mkdir ~/wiki && ./run.ru -sthin -p4567` and point your
 browser at <http://0.0.0.0:4567/>. Enjoy!
@@ -84,8 +82,8 @@ then sync your changes back when you're done.</p>
 Git is the next Unix</a></cite></p>
 </blockquote>
 
-  [Sinatra]: http://sinatrarb.com
+  [Sinatra]: http://www.sinatrarb.com
   [GitHub]: http://github.com/sr/git-wiki
   [forks]: http://github.com/sr/git-wiki/network
-  [al3x]: http://github.com/al3x/github
+  [al3x]: http://github.com/al3x/gitwiki
   [gems]: http://www.rubygems.org/

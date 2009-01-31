@@ -3,7 +3,7 @@ gem "mojombo-grit"
 
 require "sinatra/base"
 require "grit"
-require "bluecloth"
+require "rdiscount"
 
 module GitWiki
   class << self
@@ -77,8 +77,7 @@ module GitWiki
     end
 
     def to_html
-      linked = auto_link(wiki_link(content))
-      BlueCloth.new(linked).to_html
+      RDiscount.new(wiki_link(content)).to_html
     end
 
     def to_s
@@ -117,10 +116,6 @@ module GitWiki
 
       def commit_message
         new? ? "Created #{name}" : "Updated #{name}"
-      end
-
-      def auto_link(str)
-        str.gsub(/<((https?|ftp|irc):[^'">\s]+)>/xi, %Q{<a href="\\1">\\1</a>})
       end
 
       def wiki_link(str)
