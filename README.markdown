@@ -14,39 +14,41 @@ I mostly use it as a web frontend for `git`, `ls` and `vim`.
 If you want history, search, etc. you should look at other people's [forks][],
 especially [al3x][]'s one.
 
-
-## Install
+Install
+-------
 
 The fellowing [gems][] are required to run git-wiki:
 
 - [Sinatra][]
-- [mojombo-grit](http://github.com/mojombo/grit)
-- [HAML](http://haml.hamptoncatlin.com)
-- [RDiscount](http://github.com/rtomayko/rdiscount)
+- [mojombo-grit][]
+- [HAML][]
+- [RDiscount][]
 
 Run with `mkdir ~/wiki && ./run.ru -sthin -p4567` and point your
 browser at <http://0.0.0.0:4567/>. Enjoy!
 
-## Licence
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-                       Version 2, December 2004
+See also
+--------
 
-    Copyright (C) 2008 Simon Rozet <simon@rozet.name>
-    Everyone is permitted to copy and distribute verbatim or modified
-    copies of this license document, and changing it is allowed as long
-    as the name is changed.
+- [How to use vim to edit &lt;textarea&gt; in lynx][tip]
+- [WiGit][] think git-wiki except implemented in PHP
+- [ikiwiki][] is a wiki compiler supporting git
 
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-      TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
-     0. You just DO WHAT THE FUCK YOU WANT TO.
+  [Sinatra]: http://www.sinatrarb.com
+  [GitHub]: http://github.com/sr/git-wiki
+  [forks]: http://github.com/sr/git-wiki/network
+  [al3x]: http://github.com/al3x/gitwiki
+  [gems]: http://www.rubygems.org/
+  [mojombo-grit]: http://github.com/mojombo/grit
+  [HAML]: http://haml.hamptoncatlin.com
+  [RDiscount]: http://github.com/rtomayko/rdiscount
+  [tip]: http://wiki.infogami.com/using_lynx_&_vim_with_infogami
+  [WiGit]: http://el-tramo.be/software/wigit
+  [ikiwiki]: http://ikiwiki.info
 
-## See also
-
-- [WiGit](http://el-tramo.be/software/wigit) – git-wiki in PHP
-- [ikiwiki](http://ikiwiki.info/) – a wiki compiler supporting git
-
-## Quotes
+Quotes
+------
 
 <blockquote>
 <p>[...] the first wiki engine I'd consider worth using for my own projects.</p>
@@ -82,8 +84,17 @@ then sync your changes back when you're done.</p>
 Git is the next Unix</a></cite></p>
 </blockquote>
 
-  [Sinatra]: http://www.sinatrarb.com
-  [GitHub]: http://github.com/sr/git-wiki
-  [forks]: http://github.com/sr/git-wiki/network
-  [al3x]: http://github.com/al3x/gitwiki
-  [gems]: http://www.rubygems.org/
+Licence
+-------
+               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                       Version 2, December 2004
+
+    Copyright (C) 2008 Simon Rozet <simon@rozet.name>
+    Everyone is permitted to copy and distribute verbatim or modified
+    copies of this license document, and changing it is allowed as long
+    as the name is changed.
+
+               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+      TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+     0. You just DO WHAT THE FUCK YOU WANT TO.
