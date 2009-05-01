@@ -1,6 +1,3 @@
-require "rubygems"
-gem "mojombo-grit"
-
 require "sinatra/base"
 require "grit"
 require "rdiscount"
