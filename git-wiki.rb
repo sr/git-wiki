@@ -128,7 +128,6 @@ module GitWiki
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
-    enable :static
     use_in_file_templates!
 
     error PageNotFound do
