@@ -24,8 +24,8 @@ The fellowing [gems][] are required to run git-wiki:
 - [HAML][]
 - [RDiscount][]
 
-Run with `mkdir ~/wiki && ./run.ru -sthin -p4567` and point your
-browser at <http://0.0.0.0:4567/>. Enjoy!
+Run with `mkdir ~/wiki && (cd ~/wiki && git init) && ./run.ru -sthin -p4567`
+and point your browser at <http://0.0.0.0:4567/>. Enjoy!
 
 See also
 --------
