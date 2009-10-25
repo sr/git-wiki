@@ -75,7 +75,9 @@ module GitWiki
     end
 
     def to_html
-      RDiscount.new(wiki_link(content)).to_html
+      html = RDiscount.new(wiki_link(content)).to_html
+      html = "<h1>#{name}</h1>" + html unless html =~ /<h1>/
+      html
     end
 
     def to_s
@@ -204,7 +206,6 @@ __END__
 - title @page.name
 #edit
   %a{:href => "/#{@page}/edit"} Edit this page
-%h1= title
 #content
   ~"#{@page.to_html}"
 
