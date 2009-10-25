@@ -169,8 +169,8 @@ __END__
       %script{:src => "/#{File.basename(lib)}", :type => 'text/javascript'}
     :javascript
       $(document).ready(function() {
-        $.hotkeys.add('Ctrl+h', function() { document.location = '/#{Homepage}' })
-        $.hotkeys.add('Ctrl+l', function() { document.location = '/_list' })
+        $.hotkeys.add('Ctrl+1', function() { document.location = '/#{Homepage}' })
+        $.hotkeys.add('Ctrl+2', function() { document.location = '/_list' })
 
         /* title-case-ification */
         document.title = document.title.toTitleCase();
