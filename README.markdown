@@ -7,7 +7,7 @@ and [Sinatra][] to serve them.
 Features of this fork
 ---------------------
 
-## Support for images
+### Support for images
 
 You can add images to /img folder of your git repository. Subfolders are
 also supported. At least gif, png and jpg supported - content type is
@@ -17,7 +17,7 @@ your wiki pages like `![My picture](/img/2009/my_picture.jpg)`
 No web interface at this time - use `git commit`.
 
 
-## Custom h1 header
+### Custom h1 header
 
 If your wiki page contains a markdown h1 header, then
 this one is used on the page.
@@ -118,17 +118,20 @@ then sync your changes back when you're done.</p>
 Git is the next Unix</a></cite></p>
 </blockquote>
 
-Licence
--------
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-                       Version 2, December 2004
 
-    Copyright (C) 2008 Simon Rozet <simon@rozet.name>
-    Everyone is permitted to copy and distribute verbatim or modified
-    copies of this license document, and changing it is allowed as long
-    as the name is changed.
-
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-      TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
-     0. You just DO WHAT THE FUCK YOU WANT TO.
+MIT license
+-----------
+Copyright (c) 2009 Vladimir Dobriakov, vladimir.dobriakov@innoq.com
+Copyright (c) Simon Rozet
+ 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+ 
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+ 
