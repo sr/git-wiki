@@ -4,12 +4,12 @@ git-wiki
 git-wiki is a wiki that relies on git to keep pages' history
 and [Sinatra][] to serve them.
 
-Features of this fork
+Features of this fork (by geekQ)
 ---------------------
 
 ### Support for images
 
-You can add images to /img folder of your git repository. Subfolders are
+You can add images to `/img` folder of your git repository. Subfolders are
 also supported. At least gif, png and jpg supported - content type is
 set automatically by Sinatra. You can reference the images then from
 your wiki pages like `![My picture](/img/2009/my_picture.jpg)`
@@ -122,6 +122,7 @@ Git is the next Unix</a></cite></p>
 MIT license
 -----------
 Copyright (c) 2009 Vladimir Dobriakov, vladimir.dobriakov@innoq.com
+
 Copyright (c) Simon Rozet
  
 Permission is hereby granted, free of charge, to any person obtaining
