@@ -1,8 +1,43 @@
-git-wiki: because who needs cool names when you use git?
-========================================================
+git-wiki
+========
 
 git-wiki is a wiki that relies on git to keep pages' history
 and [Sinatra][] to serve them.
+
+Features of this fork
+---------------------
+
+## Support for images
+
+You can add images to /img folder of your git repository. Subfolders are
+also supported. At least gif, png and jpg supported - content type is
+set automatically by Sinatra. You can reference the images then from
+your wiki pages like `![My picture](/img/2009/my_picture.jpg)`
+
+No web interface at this time - use `git commit`.
+
+
+## Custom h1 header
+
+If your wiki page contains a markdown h1 header, then
+this one is used on the page.
+
+If not, then h1 is created out of the file name (as in original git-wiki).
+
+
+Plans
+-----
+
+* support for attachments
+* nicer CSS
+* support for deeper Wiki page folder structure
+* do not rely on wiki words
+* support for special programmed pages - via haml or liquid template
+  engine
+
+
+Original README by Simon Rozet
+------------------------------
 
 I wrote git-wiki as a quick and dirty hack, mostly to play with Sinatra.
 It turned out that Sinatra is an awesome little web framework and that this
@@ -11,13 +46,12 @@ hack isn't as useless as I first though since I now use it daily.
 However, it is definitely not feature rich and will probably never be because
 I mostly use it as a web frontend for `git`, `ls` and `vim`.
 
-If you want history, search, etc. you should look at other people's [forks][],
-especially [al3x][]'s one.
+If you want history, search, etc. you should look at other people's [forks][].
 
 Install
 -------
 
-The fellowing [gems][] are required to run git-wiki:
+The following [gems][] are required to run git-wiki:
 
 - [Sinatra][]
 - [mojombo-grit][]
