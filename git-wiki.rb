@@ -194,20 +194,40 @@ __END__
 %html
   %head
     %title= title
+    %style
+      :sass
+        body
+          margin-left: 2em
+        ul#navigation
+          list-style-type: none
+          display: inline
+          margin: 0
+          padding: 0
+          li
+            display: inline
+            margin: 0
+            padding: 0
+            padding-right: 1em
+        a.service
+          color: #4377EF
+          text-decoration: none
+          font-weight: bold
+        a.service:hover
+          border-bottom: 2px dotted #4377EF
   %body
-    %ul
+    %ul#navigation
       %li
-        %a{ :href => "/#{GitWiki.homepage}" } Home
+        %a.service{ :href => "/#{GitWiki.homepage}" } Home
       %li
-        %a{ :href => "/pages" } All pages
+        %a.service{ :href => "/pages" } All pages
     #content= yield
 
 @@ show
 - title @page.name
-#edit
-  %a{:href => "/#{@page}/edit"} Edit this page
 #content
   ~"#{@page.to_html}"
+#edit
+  %a.service{:href => "/#{@page}/edit"} Edit this page
 
 @@ edit
 - title "Editing #{@page.name}"
