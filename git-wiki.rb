@@ -148,6 +148,16 @@ module GitWiki
       haml :list
     end
 
+    get "/img/*" do
+      git_obj = GitWiki.repository.tree/'img'
+      params[:splat].each do |part|
+        git_obj = git_obj/part
+        not_found if git_obj.nil?
+      end
+      content_type File.extname(params[:splat].last)
+      body git_obj.data
+    end
+
     get "/:page/edit" do
       @page = Page.find_or_create(params[:page])
       haml :edit
@@ -182,8 +192,6 @@ __END__
 %html
   %head
     %title= title
-        $.hotkeys.add('Ctrl+1', function() { document.location = '/#{Homepage}' })
-        $.hotkeys.add('Ctrl+2', function() { document.location = '/_list' })
   %body
     %ul
       %li
