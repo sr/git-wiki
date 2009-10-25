@@ -1,241 +1,213 @@
-#!/usr/bin/env ruby
-$:.unshift *Dir[File.dirname(__FILE__) + '/vendor/**/lib'].to_a
-%w(sinatra
-grit
-rubygems
-haml
-sass
-bluecloth).each { |dependency| require dependency }
+require "sinatra/base"
+require "haml"
+require "grit"
+require "rdiscount"
 
-begin
-  require 'thin'
-rescue LoadError
-  puts '# May I suggest you to use Thin?'
-end
-
-class String
-  def to_html
-    BlueCloth.new(self).to_html.linkify
-  end
-
-  def linkify
-    self.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) do |page|
-      "<a class='#{Page.new(page).tracked? ? 'exists' : 'unknown'}' href='#{page}'>#{page.titleize}</a>"
-    end
-  end
-
-  def titleize
-    self.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
-  end
-
-  def without_ext
-    self.sub(File.extname(self), '')
-  end
-end
-
-class Page
+module GitWiki
   class << self
-    attr_accessor :repo
+    attr_accessor :homepage, :extension, :repository
+  end
 
-    def find_all
-      return [] if Page.repo.tree.contents.empty?
-      Page.repo.tree.contents.collect { |blob| Page.new(blob.name.without_ext) }
+  def self.new(repository, extension, homepage)
+    self.homepage   = homepage
+    self.extension  = extension
+    self.repository = Grit::Repo.new(repository)
+
+    App
+  end
+
+  class PageNotFound < Sinatra::NotFound
+    attr_reader :name
+
+    def initialize(name)
+      @name = name
     end
   end
 
-  attr_reader :name
-
-  def initialize(name)
-    @name = name
-  end
-
-  def body
-    raw_body.to_html
-  end
-
-  def raw_body
-    tracked? ? find_blob.data : ''
-  end
-
-  def body=(content)
-    return if content == raw_body
-    File.open(file_name, 'w') { |f| f << content }
-    add_to_index_and_commit!
-  end
-
-  def tracked?
-    !find_blob.nil?
-  end
-
-  def to_s
-    name
-  end
-
-  private
-    def find_blob
-      Page.repo.tree.contents.detect { |b| b.name == name + PageExtension }
+  class Page
+    def self.find_all
+      return [] if repository.tree.contents.empty?
+      repository.tree.contents.collect { |blob| new(blob) }
     end
 
-    def add_to_index_and_commit!
-      Dir.chdir(GitRepository) { Page.repo.add(base_name) }
-      Page.repo.commit_index(commit_message)
+    def self.find(name)
+      page_blob = find_blob(name)
+      raise PageNotFound.new(name) unless page_blob
+      new(page_blob)
     end
 
-    def file_name
-      File.join(GitRepository, name + PageExtension)
+    def self.find_or_create(name)
+      find(name)
+    rescue PageNotFound
+      new(create_blob_for(name))
     end
 
-    def base_name
-      File.basename(file_name)
+    def self.css_class_for(name)
+      find(name)
+      "exists"
+    rescue PageNotFound
+      "unknown"
     end
 
-    def commit_message
-      tracked? ? "Edited #{name}" : "Created #{name}"
+    def self.repository
+      GitWiki.repository || raise
     end
-end
 
-use_in_file_templates!
+    def self.extension
+      GitWiki.extension || raise
+    end
 
-configure do
-  GitRepository = ENV['GIT_WIKI_REPO'] || File.join(ENV['HOME'], 'wiki')
-  PageExtension = '.markdown'
-  Homepage = 'Home'
-  set_option :haml,  :format        => :html4,
-                     :attr_wrapper  => '"'
+    def self.find_blob(page_name)
+      repository.tree/(page_name + extension)
+    end
+    private_class_method :find_blob
 
-  begin
-    Page.repo = Grit::Repo.new(GitRepository)
-  rescue Grit::InvalidGitRepositoryError, Grit::NoSuchPathError
-    abort "#{GitRepository}: Not a git repository. Install your wiki with `rake bootstrap`"
+    def self.create_blob_for(page_name)
+      Grit::Blob.create(repository, {
+        :name => page_name + extension,
+        :data => ""
+      })
+    end
+    private_class_method :create_blob_for
+
+    def initialize(blob)
+      @blob = blob
+    end
+
+    def to_html
+      RDiscount.new(wiki_link(content)).to_html
+    end
+
+    def to_s
+      name
+    end
+
+    def new?
+      @blob.id.nil?
+    end
+
+    def name
+      @blob.name.gsub(/#{File.extname(@blob.name)}$/, '')
+    end
+
+    def content
+      @blob.data
+    end
+
+    def update_content(new_content)
+      return if new_content == content
+      File.open(file_name, "w") { |f| f << new_content }
+      add_to_index_and_commit!
+    end
+
+    private
+      def add_to_index_and_commit!
+        Dir.chdir(self.class.repository.working_dir) {
+          self.class.repository.add(@blob.name)
+        }
+        self.class.repository.commit_index(commit_message)
+      end
+
+      def file_name
+        File.join(self.class.repository.working_dir, name + self.class.extension)
+      end
+
+      def commit_message
+        new? ? "Created #{name}" : "Updated #{name}"
+      end
+
+      def wiki_link(str)
+        str.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) { |page|
+          %Q{<a class="#{self.class.css_class_for(page)}"} +
+            %Q{href="/#{page}">#{page}</a>}
+        }
+      end
   end
-end
 
-helpers do
-  def title(title=nil)
-    @title = title.to_s unless title.nil?
-    @title
+  class App < Sinatra::Base
+    set :app_file, __FILE__
+    set :haml, { :format        => :html5,
+                 :attr_wrapper  => '"'     }
+    use_in_file_templates!
+
+    error PageNotFound do
+      page = request.env["sinatra.error"].name
+      redirect "/#{page}/edit"
+    end
+
+    before do
+      content_type "text/html", :charset => "utf-8"
+    end
+
+    get "/" do
+      redirect "/" + GitWiki.homepage
+    end
+
+    get "/pages" do
+      @pages = Page.find_all
+      haml :list
+    end
+
+    get "/:page/edit" do
+      @page = Page.find_or_create(params[:page])
+      haml :edit
+    end
+
+    get "/:page" do
+      @page = Page.find(params[:page])
+      haml :show
+    end
+
+    post "/:page" do
+      @page = Page.find_or_create(params[:page])
+      @page.update_content(params[:body])
+      redirect "/#{@page}"
+    end
+
+    private
+      def title(title=nil)
+        @title = title.to_s unless title.nil?
+        @title
+      end
+
+      def list_item(page)
+        %Q{<a class="page_name" href="/#{page}">#{page.name}</a>}
+      end
   end
-
-  def list_item(page)
-    '<a class="page_name" href="/%s">%s</a>' % [page, page.name.titleize]
-  end
-end
-
-before { content_type 'text/html', :charset => 'utf-8' }
-
-get('/') { redirect '/' + Homepage }
-
-get '/_stylesheet.css' do
-  content_type 'text/css', :charset => 'utf-8'
-  sass :stylesheet
-end
-
-get '/_list' do
-  @pages = Page.find_all
-  haml :list
-end
-
-get '/:page' do
-  @page = Page.new(params[:page])
-  @page.tracked? ? haml(:show) : redirect("/e/#{@page.name}")
-end
-
-get '/:page.txt' do
-  @page = Page.new(params[:page])
-  throw :halt, [404, "Unknown page #{params[:page]}"] unless @page.tracked?
-  content_type 'text/plain', :charset => 'utf-8'
-  @page.raw_body
-end
-
-get '/e/:page' do
-  @page = Page.new(params[:page])
-  haml :edit
-end
-
-post '/e/:page' do
-  @page = Page.new(params[:page])
-  @page.body = params[:body]
-  request.xhr? ? @page.body : redirect("/#{@page.name}")
 end
 
 __END__
 @@ layout
-!!! strict
+!!!
 %html
   %head
     %title= title
-    %link{:rel => 'stylesheet', :href => '/_stylesheet.css', :type => 'text/css'}
-    - Dir[Sinatra.application.options.public + '/*.js'].reverse.each do |lib|
-      %script{:src => "/#{File.basename(lib)}", :type => 'text/javascript'}
-    :javascript
-      $(document).ready(function() {
         $.hotkeys.add('Ctrl+1', function() { document.location = '/#{Homepage}' })
         $.hotkeys.add('Ctrl+2', function() { document.location = '/_list' })
-
-        /* title-case-ification */
-        document.title = document.title.toTitleCase();
-        $('h1:first').text($('h1:first').text().toTitleCase());
-        $('a').each(function(i) {
-          var e = $(this)
-          e.text(e.text().toTitleCase());
-        })
-      })
   %body
+    %ul
+      %li
+        %a{ :href => "/#{GitWiki.homepage}" } Home
+      %li
+        %a{ :href => "/pages" } All pages
     #content= yield
 
 @@ show
-- title @page.name.titleize
-:javascript
-  $(document).ready(function() {
-    $.editable.addInputType('autogrow', {
-      element : function(settings, original) {
-        var textarea = $('<textarea>');
-        if (settings.rows) {
-          textarea.attr('rows', settings.rows);
-        } else {
-          textarea.height(settings.height);
-        }
-        if (settings.cols) {
-          textarea.attr('cols', settings.cols);
-        } else {
-          textarea.width(settings.width);
-        }
-        $(this).append(textarea);
-        return(textarea);
-      },
-      plugin : function(settings, original) {
-        $('textarea', this).autogrow(settings.autogrow);
-      }
-    });
-
-    $('#page_content').editable('/e/#{@page}', {
-      loadurl: '/#{@page}.txt',
-      submit: '<button class="submit" type="submit">Save as the newest version</button>',
-      cancel: '<a class="cancel" href="" style="margin-left: 5px;">cancel</a>',
-      event: 'dblclick',
-      type: 'autogrow',
-      cols: 84,
-      rows: 20,
-      name: 'body',
-      onblur: 'ignore',
-      tooltip: ' ',
-      indicator: 'Saving...',
-      loadtext: '',
-      cssclass: 'edit_form',
-    })
-  })
+- title @page.name
+#edit
+  %a{:href => "/#{@page}/edit"} Edit this page
 %h1= title
-#page_content
-  ~"#{@page.body}"
+#content
+  ~"#{@page.to_html}"
 
 @@ edit
-- title "Editing #{@page.name.titleize}"
+- title "Editing #{@page.name}"
 %h1= title
-%form{:method => 'POST', :action => "/e/#{@page}"}
+%form{:method => 'POST', :action => "/#{@page}"}
   %p
-    %textarea{:name => 'body', :rows => 16, :cols => 60}= @page.raw_body
+    %textarea{:name => 'body', :rows => 30, :style => "width: 100%"}= @page.content
   %p
-    %input.submit{:type => :submit, :value => 'Save as the newest version'}
+    %input.submit{:type => :submit, :value => "Save as the newest version"}
     or
     %a.cancel{:href=>"/#{@page}"} cancel
 
@@ -245,57 +217,6 @@ __END__
 - if @pages.empty?
   %p No pages found.
 - else
-  %ul#pages_list
-    - @pages.each_with_index do |page, index|
-      - if (index % 2) == 0
-        %li.odd=  list_item(page)
-      - else
-        %li.even= list_item(page)
-
-@@ stylesheet
-body
-  :font
-    family: "Lucida Grande", Verdana, Arial, Bitstream Vera Sans, Helvetica, sans-serif
-    size: 14px
-    color: black
-  line-height: 160%
-  background-color: white
-  margin: 0
-  padding: 0
-#content
-  padding: 2em
-a
-  padding: 2px
-  color: blue
-  &.exists
-    &:hover
-      background-color: blue
-      text-decoration: none
-      color: white
-  &.unknown
-    color: gray
-    &:hover
-      background-color: gray
-      color: white
-      text-decoration: none
-  &.cancel
-    color: red
-    &:hover
-      text-decoration: none
-      background-color: red
-      color: white
-textarea
-  font-family: courrier
-  font-size: 14px
-  line-height: 18px
-  padding: 5px
-button.submit
-  font-weight: bold
-ul#pages_list
-  list-style-type: none
-  margin: 0
-  padding: 0
-  li
-    padding: 5px
-    &.odd
-      background-color: #D3D3D3
+  %ul#list
+    - @pages.each do |page|
+      %li= list_item(page)
