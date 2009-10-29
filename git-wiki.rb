@@ -214,6 +214,9 @@ __END__
           font-weight: bold
         a.service:hover
           border-bottom: 2px dotted #4377EF
+        @media print
+          .service
+            display: none
   %body
     %ul#navigation
       %li
