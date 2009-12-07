@@ -117,9 +117,11 @@ module GitWiki
       end
 
       def wiki_link(str)
-        str.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) { |page|
-          %Q{<a class="#{self.class.css_class_for(page)}"} +
-            %Q{href="/#{page}">#{page}</a>}
+        str.gsub(/\[\[([^\]]+\]\])/) { |page|
+            file = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9]/,'_');
+            linktext = page.gsub('[','').gsub(']','');
+            %Q{<a class="#{self.class.css_class_for(page)}" } +
+            %Q{href="/#{file}">#{linktext}</a>}
         }
       end
   end
