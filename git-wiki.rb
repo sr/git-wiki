@@ -120,7 +120,7 @@ module GitWiki
         str.gsub(/\[\[([^\]]+\]\])/) { |page|
             file = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9]/,'_');
             linktext = page.gsub('[','').gsub(']','');
-            %Q{<a class="#{self.class.css_class_for(page)}" } +
+            %Q{<a class="#{self.class.css_class_for(file)}" } +
             %Q{href="/#{file}">#{linktext}</a>}
         }
       end
@@ -168,12 +168,13 @@ module GitWiki
 
     private
       def title(title=nil)
-        @title = title.to_s unless title.nil?
+        @title = title.to_s.gsub('_',' ').gsub(/\b\w+/){$&.capitalize} unless title.nil?
         @title
       end
 
       def list_item(page)
-        %Q{<a class="page_name" href="/#{page}">#{page.name}</a>}
+        title = page.name.gsub('_',' ').gsub(/\b\w+/){$&.capitalize}
+        %Q{<a class="page_name" href="/#{page}">#{title}</a>}
       end
   end
 end
@@ -184,6 +185,7 @@ __END__
 %html
   %head
     %title= title
+    %style{ :type=> "text/css" } .unknown { color:red; }
   %body
     %ul
       %li
