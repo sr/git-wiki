@@ -1,1 +1,2 @@
-Use Rack XSL instead of Haml.
+* Use Rack XSL instead of Haml.
+* Ruby GD?
