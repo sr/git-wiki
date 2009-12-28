@@ -1,3 +1,4 @@
+require "rubygems"
 require "sinatra/base"
 require "haml"
 require "grit"
@@ -198,6 +199,18 @@ __END__
       :sass
         body
           margin-left: 2em
+          font-family: monospace
+        h1, h2, h3, h4, h5, h6
+          font-size: 100%
+        h1
+          text-decoration: underline
+          letter-spacing: 0.3em
+        h2
+          text-decoration: underline
+        ul
+          padding-left: 0.3em
+          list-style-type: square
+          list-style-position: inside
         ul#navigation
           list-style-type: none
           display: inline
