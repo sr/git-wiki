@@ -130,6 +130,8 @@ module GitWiki
   end
 
   class App < Sinatra::Base
+    set :public, File.dirname(__FILE__) + '/public'
+    set :static, true
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
@@ -189,6 +191,7 @@ __END__
   %head
     %title= title
     %style{ :type=> "text/css" } .unknown { color:red; }
+    %script{ :type=> "text/javascript", :src=> "/s/js/jquery/dist/jquery.min.js" }
   %body
     %ul
       %li
