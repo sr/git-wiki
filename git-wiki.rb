@@ -2,6 +2,9 @@ require "sinatra/base"
 require "haml"
 require "grit"
 require "rdiscount"
+require 'rack-xslview'
+require 'rexml/document'
+require 'rack-docunext-content-length'
 
 module GitWiki
   class << self
