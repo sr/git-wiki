@@ -51,6 +51,10 @@ module GitWiki
       "unknown"
     end
 
+    def self.history
+      repository.commits
+    end
+
     def self.repository
       GitWiki.repository || raise
     end
@@ -154,10 +158,20 @@ module GitWiki
       haml :list
     end
 
+    get "/commits" do
+      @commits = Page.history
+      haml :commits
+    end
+
     get "/:page/edit" do
       @page = Page.find_or_create(params[:page])
       haml :edit
     end
+
+    #get "/:page/history" do
+    #  @page = Page.history
+    #  haml :history
+    #end
 
     get "/:page" do
       @page = Page.find(params[:page])
@@ -190,19 +204,22 @@ __END__
   %head
     %title= title
     %style{ :type=> "text/css" } .unknown { color:red; }
-    %script{ :type=> "text/javascript", :src=> "/s/js/jquery/dist/jquery.min.js" }
+    %script{ :type=> "text/javascript", :src=> "/s/js/jquery/jquery-1.3.2.min.js" }
   %body
     %ul
       %li
         %a{ :href => "/#{GitWiki.homepage}" } Home
       %li
         %a{ :href => "/pages" } All pages
+        %a{ :href => "/commits" } Commits
     #content= yield
 
 @@ show
 - title @page.name
 #edit
   %a{:href => "/#{@page}/edit"} Edit this page
+#history
+  %a{:href => "/#{@page}/history"} History
 %h1= title
 #content
   ~"#{@page.to_html}"
@@ -227,3 +244,13 @@ __END__
   %ul#list
     - @pages.each do |page|
       %li= list_item(page)
+
+@@ commits
+- title "Listing commits"
+%h1 All commits
+- if @commits.empty?
+  %p No commits found.
+- else
+  %ul#list
+    - @commits.each do |commit|
+      %li= commit.id << " " << commit.authored_date.to_s
