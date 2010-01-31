@@ -227,10 +227,17 @@ __END__
           letter-spacing: 0.3em
         h2
           text-decoration: underline
+        del
+          color: gray
         ul
           padding-left: 0.3em
           list-style-type: square
           list-style-position: inside
+        li ul
+          list-style-type: circle
+          padding-left: 1.2em
+        li ul li ul
+          list-style-type: disc
         ul#navigation
           list-style-type: none
           display: inline
