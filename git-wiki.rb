@@ -77,8 +77,28 @@ module GitWiki
 
     def to_html
       html = RDiscount.new(wiki_link(content)).to_html
-      html = "<h1>#{name}</h1>" + html unless html =~ /<h1>/
+      html = inject_links(inject_todo(inject_header(html)))
       html
+    end
+
+    def inject_header(orig)
+      orig =~ /<h1>/ ? "<h1>#{name}</h1>" + orig : orig
+    end
+
+    def inject_todo(orig)
+      orig.gsub /^\s*<li>(TODO|DONE)
+      ((\s(\w+)\:(\w+))+\s)? # tagged values
+      (.*) # title
+      /x do
+        puts $1
+        puts $2
+        puts $3
+        '<li>doDO'
+      end
+    end
+
+    def inject_links(orig)
+      orig
     end
 
     def to_s
