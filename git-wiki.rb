@@ -28,7 +28,7 @@ module GitWiki
   class Page
     def self.find_all
       return [] if repository.tree.contents.empty?
-      repository.tree.contents.collect { |blob| new(blob) }
+      repository.tree.contents.collect { |blob| new(blob) }.sort_by {|page| page.name.downcase}
     end
 
     def self.find(name)
