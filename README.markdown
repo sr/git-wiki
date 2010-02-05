@@ -25,6 +25,15 @@ this one is used on the page.
 If not, then h1 is created out of the file name (as in original git-wiki).
 
 
+### Integrated TODO list(s)
+
+Just write TODO or DONE at the beginning of a line with task you would like to
+remember.
+
+TODO: support tagged values, e.g. `TODO context:home Recharge the helicopter batteries`
+TODO: gather all the tasks into `task inventory` page
+TODO: include a task list filtered by tagged value, e.g. `TASKS context:home` should list all the tasks for the specified context.
+
 Plans
 -----
 

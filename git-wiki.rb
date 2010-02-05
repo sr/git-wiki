@@ -92,7 +92,7 @@ module GitWiki
       /x do
         res = "<span style='font-weight:bold'>#{$1}</span>#{$+}"
         res = "<del>#{res}</del>" if $1 == 'DONE'
-        "<div>#{res}</div>"
+        "<div class='todo'>#{res}</div>"
       end
     end
 
@@ -228,6 +228,8 @@ __END__
           text-decoration: underline
         del
           color: gray
+        div.todo
+          line-height: 160%
         ul
           padding-left: 0.3em
           list-style-type: square
