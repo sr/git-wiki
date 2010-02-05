@@ -76,8 +76,8 @@ module GitWiki
     end
 
     def to_html
-      html = RDiscount.new(wiki_link(content)).to_html
-      html = inject_links(inject_todo(inject_header(html)))
+      html = RDiscount.new(wiki_link(inject_todo(content))).to_html
+      html = inject_links(inject_header(html))
       html
     end
 
@@ -86,14 +86,13 @@ module GitWiki
     end
 
     def inject_todo(orig)
-      orig.gsub /^\s*<li>(TODO|DONE)
-      ((\s(\w+)\:(\w+))+\s)? # tagged values
-      (.*) # title
+      orig.gsub /^((?: DO|TODO|DONE):?\b)    # 1:TODO with optional colon
+      (?: (?: \s(\w+)\:(\w+))+\s)?         # tagged values 2:key 3:value
+      (.*)                                 # 4:title
       /x do
-        puts $1
-        puts $2
-        puts $3
-        '<li>doDO'
+        res = "<span style='font-weight:bold'>#{$1}</span>#{$+}"
+        res = "<del>#{res}</del>" if $1 == 'DONE'
+        "<div>#{res}</div>"
       end
     end
 
