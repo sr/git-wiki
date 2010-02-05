@@ -82,7 +82,7 @@ module GitWiki
     end
 
     def inject_header(orig)
-      orig =~ /<h1>/ ? "<h1>#{name}</h1>" + orig : orig
+      orig =~ /<h1>/ ? orig : "<h1>#{name}</h1>" + orig
     end
 
     def inject_todo(orig)
