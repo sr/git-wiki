@@ -257,6 +257,12 @@ module GitWiki
       haml :show
     end
 
+    get "/raw/:page" do
+      @page = Page.find(params[:page])
+      content_type 'text'
+      @page.content
+    end
+
     private
       def title(title=nil)
         @title = title.to_s unless title.nil?
