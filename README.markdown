@@ -43,9 +43,9 @@ ContextCoding page I have following reference:
 
     INCLUDE http://github.com/geekq/git-wiki/raw/master/README.markdown
 
-* TODO: iclude via http
+* DONE: iclude via http
 * TODO: include a task list filtered by tagged value, e.g.  `TASKS context:home` should list all the tasks for the specified context.
-* TODO: allow optional asterisk in front of TODO
+* DONE: allow optional asterisk in front of TODO
 * TODO: group included lists by project
 * TODO: merge and resort tasks from subsequent INCLUDE statements
 * TODO: gather all the remaining (not referenced) tasks into `task inventory` page

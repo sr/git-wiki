@@ -35,20 +35,19 @@ module GitWiki
 
     def self.parse(from_string)
       t = Task.new
-      t.orig_string = from_string
+      t.orig_string = from_string + ' ' # add space to parse include statements without description
       return nil unless t.orig_string =~
-        /^((?: DO|TODO|DONE|INCLUDE):?\s+)    # 1:TODO with optional colon
-        (#{TAGGED_VALUE_REGEX}+)?  # tagged values 2:, 3:, 4:
-        (.*)                         # 5:title
+        /^(?: \s*\*?\s*)                  # allow leading * with white space to both sides
+        ((?: DO|TODO|DONE|INCLUDE):?\s+)  # 1:TODO with optional colon
+        (#{TAGGED_VALUE_REGEX}+)?         # tagged values 2:, 3:, 4:
+        (.*)                              # 5:title
         /x
       t.start = $1
       t.attributes_str = $2
-      t.desc = $+
+      t.desc = $+.strip
 
       t.attributes = []
       t.attributes = $2.scan(TAGGED_VALUE_REGEX) if $2
-
-      pp t
 
       t
     end
@@ -91,12 +90,12 @@ module GitWiki
       wiki_name = "Context#{example.context}" if example.context
       if wiki_name
         begin
-          puts "fill_from_git '#{wiki_name}'"
           res.fill_from_git wiki_name
         rescue PageNotFound => p
-          puts "NOT FOUND"
-          res.example.desc = "Page not found #{p.name}"
+          res.example.desc = "PAGE NOT FOUND #{p.name}"
         end
+      elsif example.desc =~ /^http/
+        res.fill_from_url(example.desc) rescue res.example.desc "CAN NOT RETRIEVE URL"
       end
       res
     end
