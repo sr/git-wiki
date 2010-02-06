@@ -31,11 +31,25 @@ If not, then h1 is created out of the file name (as in original git-wiki).
 Just write TODO or DONE at the beginning of a line with task you would like to
 remember.
 
-TODO: support tagged values, e.g. `TODO context:home Recharge the helicopter batteries`
-TODO: gather all the tasks into `task inventory` page
-TODO: include a task list filtered by tagged value, e.g. 
-  `TASKS context:home` should list all the tasks for the specified context.
 
+#### Inclusion
+
+You can include tasks from other wiki pages. So it is possible to have
+one separate page per project, e.g. ProjectGitWiki, ProjectWorkflow and
+to aggregate all coding tasks on one, say ContextCoding page.
+
+You can also reference a source on the web. I prefer to manage my
+tasks related to git-wiki development in this README file. So on my
+ContextCoding page I have following reference:
+
+    INCLUDE http://github.com/geekq/git-wiki/raw/master/README.markdown
+
+* TODO: iclude via http
+* TODO: include a task list filtered by tagged value, e.g.  `TASKS context:home` should list all the tasks for the specified context.
+* TODO: allow optional asterisk in front of TODO
+* TODO: group included lists by project
+* TODO: merge and resort tasks from subsequent INCLUDE statements
+* TODO: gather all the remaining (not referenced) tasks into `task inventory` page
 
 ### No wiki words
 
@@ -43,15 +57,18 @@ For a hacker the wiki words is more a distraction than a help. Example:
 if I mention ActiveRecord, than it should not link to the wiki article
 ActiveRecord but appear as it is.
 
-Plans
------
+* TODO: do not rely on wiki words
 
-* support for attachments
-* nicer CSS
-* support for deeper Wiki page folder structure
-* do not rely on wiki words
-* support for special programmed pages - via haml or liquid template
-  engine
+### Other plans
+---------------
+
+* TODO: keyboard short cuts for edit and saving
+* TODO: check dead links
+* TODO: search engine
+* IDEA: presentation system - markdown + my S5 alternative
+* IDEA: support for attachments
+* IDEA: support for deeper Wiki page folder structure
+* IDEA: support for special programmed pages - via haml or liquid template engine
 
 
 Original README by Simon Rozet
