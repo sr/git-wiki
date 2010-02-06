@@ -37,13 +37,12 @@ You can include tasks from other wiki pages. So it is possible to have
 one separate page per project, e.g. ProjectGitWiki, ProjectWorkflow and
 to aggregate all coding tasks on one, say ContextCoding page.
 
-You can also reference a source on the web. I prefer to manage my
-tasks related to git-wiki development in this README file. So on my
-ContextCoding page I have following reference:
+You can also reference a source on the web. I prefer to manage my tasks
+related to git-wiki development in this README file. So on my
+ContextCoding page I have following reference: `INCLUDE
+http://github.com/geekq/git-wiki/raw/master/README.markdown`
 
-    INCLUDE http://github.com/geekq/git-wiki/raw/master/README.markdown
-
-* DONE: iclude via http
+* DONE: include via http
 * TODO: include a task list filtered by tagged value, e.g.  `TASKS context:home` should list all the tasks for the specified context.
 * DONE: allow optional asterisk in front of TODO
 * TODO: group included lists by project

@@ -292,11 +292,13 @@ module GitWiki
 
     get "/:page/edit" do
       @page = Page.find_or_create(params[:page])
+      @global_style = 'vimlike'
       haml :edit
     end
 
     get "/:page" do
       @page = Page.find(params[:page])
+      @global_style = 'vimlike'
       haml :show
     end
 
@@ -338,30 +340,9 @@ __END__
     %title= title
     %style
       :sass
-        body
-          margin-left: 2em
-          font-family: monospace
-        h1, h2, h3, h4, h5, h6
-          font-size: 100%
-        h1
-          text-decoration: underline
-          letter-spacing: 0.3em
-        h2
-          text-decoration: underline
         del
           color: gray
-        div.todo
-          line-height: 160%
-        ul
-          padding-left: 0.3em
-          list-style-type: square
-          list-style-position: inside
-        li ul
-          list-style-type: circle
-          padding-left: 1.2em
-        li ul li ul
-          list-style-type: disc
-        ul#navigation
+        ul.navigation
           list-style-type: none
           display: inline
           margin: 0
@@ -370,35 +351,68 @@ __END__
             display: inline
             margin: 0
             padding: 0
-            padding-right: 1em
+            padding-right: 1.5em
         a.service
           color: #4377EF
           text-decoration: none
           font-weight: bold
         a.service:hover
           border-bottom: 2px dotted #4377EF
+        div#page_navigation
+          margin-top: 0.6em
+
+        body.vimlike
+          margin-left: 2em
+          font-family: monospace
+          div#content
+            h1, h2, h3, h4, h5, h6
+              font-size: 100%
+            h1
+              text-decoration: underline
+              letter-spacing: 0.3em
+            h2
+              text-decoration: underline
+            ul
+              padding-left: 0.3em
+              list-style-type: square
+              list-style-position: inside
+            li ul
+              list-style-type: circle
+              padding-left: 1.2em
+            li ul li ul
+              list-style-type: disc
+
         @media print
           .service
             display: none
+          div.todo
+            line-height: 160%
+
         body.compact
           margin-left: inherit
           font-family: Helvetica, sans-serif
           .service
             display: none
   %body{:class => @global_style}
-    %ul#navigation
+    %ul.navigation
       %li
         %a.service{ :href => "/#{GitWiki.homepage}" } Home
       %li
         %a.service{ :href => "/pages" } All pages
-    #content= yield
+    = yield
 
 @@ show
 - title @page.name
 #content
   ~"#{@page.to_html}"
-#edit
-  %a.service{:href => "/#{@page}/edit"} Edit this page
+#page_navigation
+  %ul.navigation#edit
+    %li
+      %a.service{:href => "/#{@page}/edit"} Edit this page
+    %li
+      %a.service{:href => "/compact/#{@page}"} Compact view
+    %li
+      %a.service{:href => "/raw/#{@page}"} Raw view
 
 @@ edit
 - title "Editing #{@page.name}"
