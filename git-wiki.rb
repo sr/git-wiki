@@ -28,28 +28,24 @@ module GitWiki
   class Task
     attr_accessor :orig_string, :start, :attributes_str, :attributes, :desc
 
-    TAGGED_VALUE_REGEX = /\s+(\w+)\:(\w+)/
+    TAGGED_VALUE_REGEX = /(\w+)\:(\w+)\s+/
 
     def self.parse(from_string)
       t = Task.new
       t.orig_string = from_string
       return nil unless t.orig_string =~
-        /^((?: DO|TODO|DONE):?\b)    # 1:TODO with optional colon
-        (#{TAGGED_VALUE_REGEX}+\s)?  # tagged values 2:, 3:, 4:
+        /^((?: DO|TODO|DONE|INCLUDE):?\s+)    # 1:TODO with optional colon
+        (#{TAGGED_VALUE_REGEX}+)?  # tagged values 2:, 3:, 4:
         (.*)                         # 5:title
         /x
       t.start = $1
       t.attributes_str = $2
       t.desc = $+
 
-      puts
-      puts from_string
-      puts $~.inspect
-      if $2
-        puts "  " + $2.scan(TAGGED_VALUE_REGEX).inspect
-      end
+      t.attributes = []
+      t.attributes = $2.scan(TAGGED_VALUE_REGEX) if $2
 
-        require 'pp'
+      require 'pp'
       pp t
       t
     end
@@ -64,21 +60,65 @@ module GitWiki
       start =~ /DONE/
     end
 
+    def include_statement?
+      start =~ /INCLUDE/
+    end
+
+    def [](key)
+      hit = attributes.detect {|k, value| k.to_s == key.to_s}
+      hit ? hit[1] : nil
+    end
+
     def project
+      self[:project]
     end
 
     def context
+      self[:context]
     end
   end
 
   class TaskList
-    def self.from_git()
+    attr_accessor :example, :tasks
+
+    def self.from_example(example)
+      res = TaskList.new
+      res.example = example
+      if example.project
+        begin
+          res.fill_from_git(example.project)
+        rescue PageNotFound => p
+          puts "NOT FOUDN"
+          res.example.desc = "Page not found #{p.name}"
+        end
+      end
+      res
     end
 
-    def self.from_url()
+    def initialize
+      tasks = []
+    end
+
+    def fill_from_git(page)
+      puts "in fill_rom_git"
+      puts page.inspect
+      p = Page.find(page)
+      if p
+        p.content.each_line do |line|
+          task = Task.parse(line) # try every line as a task decription
+          tasks << task unless task.nil?
+        end
+      end
+    end
+
+    def fill_from_url()
     end
 
     def filter(example)
+    end
+
+    def to_html
+      example.to_html + "\n Details will appear here"
     end
   end
 
@@ -146,7 +186,14 @@ module GitWiki
       res = []
       orig.each_line do |line|
         task = Task.parse(line) # try every line as a task decription
-        res << (task.nil? ? line : task.to_html)
+        if task.nil?
+          res << line
+        elsif task.include_statement?
+          list = TaskList.from_example(task)
+          res << list.to_html
+        else
+          res << task.to_html
+        end
       end
       res.join
     end
