@@ -57,7 +57,7 @@ For a hacker the wiki words is more a distraction than a help. Example:
 if I mention ActiveRecord, than it should not link to the wiki article
 ActiveRecord but appear as it is.
 
-* TODO: do not rely on wiki words
+* DONE: do not rely on wiki words
 
 ### Other plans
 

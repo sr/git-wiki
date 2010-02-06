@@ -29,7 +29,7 @@ module GitWiki
   end
 
   class Task
-    attr_accessor :orig_string, :start, :attributes_str, :attributes, :desc
+    attr_accessor :orig_string, :start, :attributes_str, :attributes, :desc, :origin
 
     TAGGED_VALUE_REGEX = /(\w+)\:(\w+)\s+/
 
@@ -52,10 +52,18 @@ module GitWiki
       t
     end
 
-    def to_html
+    def inner_html
       html = "<span style='font-weight:bold'>#{start}</span>#{attributes_str}#{desc}"
       html = "<del>#{html}</del>" if done?
-      "<div class='todo'>#{html}</div>"
+      html
+    end
+
+    def wrap_div(inner)
+      "<div class='todo'>#{inner}</div>"
+    end
+
+    def to_html
+      wrap_div(inner_html)
     end
 
     def done?
@@ -104,10 +112,11 @@ module GitWiki
       self.tasks = []
     end
 
-    def fill_from_string(content, recursive = false)
+    def fill_from_string(content, origin, recursive = false)
       content.each_line do |line|
         task = Task.parse(line) # try every line as a task decription
         if !task.nil?
+          task.origin = origin
           if task.include_statement? && recursive
             puts "  recursively including #{task.desc}"
             list = TaskList.from_example(task)
@@ -121,23 +130,27 @@ module GitWiki
 
     def fill_from_git(page, recursive = false)
       p = Page.find(page)
-      fill_from_string(p.content, recursive) if p
+      puts "SRC #{page}"
+      fill_from_string(p.content, "/#{page}/edit", recursive) if p
     end
 
     def fill_from_url(url)
       require 'rest_client'
       content = RestClient.get(url) rescue 'Content could not be retrieved.'
-      fill_from_string(content)
+      fill_from_string(content, url)
     end
 
     def filter(example)
     end
 
     def to_html
-      tasks_html = tasks.map{|task| task.to_html}.join("\n")
+      tasks_html = tasks.map do |task|
+        link = " (<a href='#{task.origin}'>edit</a>)"
+        task.wrap_div(task.inner_html + link)
+      end
       "<div class='included'>
          <h2>#{example.to_html} (#{tasks.size} tasks)</h2>
-         #{tasks_html}
+         #{tasks_html.join("\n")}
        </div>"
     end
   end
@@ -193,7 +206,7 @@ module GitWiki
     end
 
     def to_html
-      html = RDiscount.new(wiki_link(inject_todo(content))).to_html
+      html = RDiscount.new(inject_todo(content)).to_html
       html = inject_links(inject_header(html))
       html
     end
@@ -258,13 +271,6 @@ module GitWiki
 
       def commit_message
         new? ? "Created #{name}" : "Updated #{name}"
-      end
-
-      def wiki_link(str)
-        str.gsub(/([A-Z][a-z]+[A-Z][A-Za-z0-9]+)/) { |page|
-          %Q{<a class="#{self.class.css_class_for(page)}"} +
-            %Q{href="/#{page}">#{page}</a>}
-        }
       end
   end
 
