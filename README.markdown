@@ -1,17 +1,18 @@
 git-wiki
 ========
 
-git-wiki is a wiki that relies on git to keep pages' history
-and [Sinatra][] to serve them.
+git-wiki is a wiki that relies on git to keep pages' history and
+[Sinatra][] to serve them.  This geek brain overlay system aims to
+replace trac (wiki and ticket system), a CMS and sticky notes.
 
 Features of this fork (by geekQ)
 ---------------------
 
 ### Support for images
 
-You can add images to `/img` folder of your git repository. Subfolders are
-also supported. At least gif, png and jpg supported - content type is
-set automatically by Sinatra. You can reference the images then from
+You can add images to `/img` folder of your git repository. Subfolders
+are also supported. At least gif, png and jpg supported - content type
+is set automatically by Sinatra. You can reference the images then from
 your wiki pages like `![My picture](/img/2009/my_picture.jpg)`
 
 No web interface at this time - use `git commit`.
@@ -32,7 +33,15 @@ remember.
 
 TODO: support tagged values, e.g. `TODO context:home Recharge the helicopter batteries`
 TODO: gather all the tasks into `task inventory` page
-TODO: include a task list filtered by tagged value, e.g. `TASKS context:home` should list all the tasks for the specified context.
+TODO: include a task list filtered by tagged value, e.g. 
+  `TASKS context:home` should list all the tasks for the specified context.
+
+
+### No wiki words
+
+For a hacker the wiki words is more a distraction than a help. Example:
+if I mention ActiveRecord, than it should not link to the wiki article
+ActiveRecord but appear as it is.
 
 Plans
 -----
