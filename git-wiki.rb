@@ -4,6 +4,9 @@ require "haml"
 require "grit"
 require "rdiscount"
 
+require 'pp' # TODO: remove
+require 'ruby-debug' # TODO: remove
+
 module GitWiki
   class << self
     attr_accessor :homepage, :extension, :repository
@@ -45,8 +48,8 @@ module GitWiki
       t.attributes = []
       t.attributes = $2.scan(TAGGED_VALUE_REGEX) if $2
 
-      require 'pp'
       pp t
+
       t
     end
 
@@ -84,11 +87,14 @@ module GitWiki
     def self.from_example(example)
       res = TaskList.new
       res.example = example
-      if example.project
+      wiki_name = "Project#{example.project}" if example.project
+      wiki_name = "Context#{example.context}" if example.context
+      if wiki_name
         begin
-          res.fill_from_git(example.project)
+          puts "fill_from_git '#{wiki_name}'"
+          res.fill_from_git wiki_name
         rescue PageNotFound => p
-          puts "NOT FOUDN"
+          puts "NOT FOUND"
           res.example.desc = "Page not found #{p.name}"
         end
       end
@@ -96,29 +102,32 @@ module GitWiki
     end
 
     def initialize
-      tasks = []
+      self.tasks = []
     end
 
-    def fill_from_git(page)
-      puts "in fill_rom_git"
-      puts page.inspect
-      p = Page.find(page)
-      if p
-        p.content.each_line do |line|
-          task = Task.parse(line) # try every line as a task decription
-          tasks << task unless task.nil?
-        end
+    def fill_from_string(content)
+      content.each_line do |line|
+        task = Task.parse(line) # try every line as a task decription
+        tasks << task unless task.nil?
       end
     end
 
-    def fill_from_url()
+    def fill_from_git(page)
+      p = Page.find(page)
+      fill_from_string(p.content) if p
+    end
+
+    def fill_from_url(url)
+      require 'rest_client'
+      content = RestClient.get(url) rescue 'Content could not be retrieved.'
+      fill_from_string(content)
     end
 
     def filter(example)
     end
 
     def to_html
-      example.to_html + "\n Details will appear here"
+      "<h2>#{example.to_html} (#{tasks.size} tasks)</h2>" + tasks.map{|task| task.to_html}.join("\n")
     end
   end
 

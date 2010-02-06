@@ -20,10 +20,9 @@ No web interface at this time - use `git commit`.
 
 ### Custom h1 header
 
-If your wiki page contains a markdown h1 header, then
-this one is used on the page.
-
-If not, then h1 is created out of the file name (as in original git-wiki).
+If your wiki page contains a markdown h1 header, then this one is used
+on the page. If not, then h1 is created out of the file name (as in
+original git-wiki).
 
 
 ### Integrated TODO list(s)
@@ -60,7 +59,6 @@ ActiveRecord but appear as it is.
 * TODO: do not rely on wiki words
 
 ### Other plans
----------------
 
 * TODO: keyboard short cuts for edit and saving
 * TODO: check dead links
