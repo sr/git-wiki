@@ -44,6 +44,7 @@ http://github.com/geekq/git-wiki/raw/master/README.markdown`
 
 * DONE: include via http
 * DONE: recursive inclusion
+* DONE: mark included tasks in special way
 * TODO: include a task list filtered by tagged value, e.g.  `TASKS context:home` should list all the tasks for the specified context.
 * DONE: allow optional asterisk in front of TODO
 * TODO: group included lists by project

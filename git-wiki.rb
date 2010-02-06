@@ -134,7 +134,11 @@ module GitWiki
     end
 
     def to_html
-      "<h2>#{example.to_html} (#{tasks.size} tasks)</h2>" + tasks.map{|task| task.to_html}.join("\n")
+      tasks_html = tasks.map{|task| task.to_html}.join("\n")
+      "<div class='included'>
+         <h2>#{example.to_html} (#{tasks.size} tasks)</h2>
+         #{tasks_html}
+       </div>"
     end
   end
 
@@ -368,6 +372,21 @@ __END__
           border-bottom: 2px dotted #4377EF
         div#page_navigation
           margin-top: 0.6em
+        div.included
+          background-color: #eee
+          min-height: 3em
+          padding: 0
+          margin-top: 0.7em
+          h2
+            padding: 0
+            margin: 0
+            position: absolute
+            right: 1em
+            width: auto
+            font-weight: normal !important
+            text-decoration: none !important
+            color: grey
+            text-align: right
 
         body.vimlike
           margin-left: 2em
