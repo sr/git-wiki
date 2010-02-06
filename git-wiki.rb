@@ -196,6 +196,12 @@ module GitWiki
       redirect "/#{@page}"
     end
 
+    get "/compact/:page" do # especially suitable for iPhone
+      @page = Page.find(params[:page])
+      @global_style = 'compact'
+      haml :show
+    end
+
     private
       def title(title=nil)
         @title = title.to_s unless title.nil?
@@ -258,7 +264,12 @@ __END__
         @media print
           .service
             display: none
-  %body
+        body.compact
+          margin-left: inherit
+          font-family: Helvetica, sans-serif
+          .service
+            display: none
+  %body{:class => @global_style}
     %ul#navigation
       %li
         %a.service{ :href => "/#{GitWiki.homepage}" } Home
