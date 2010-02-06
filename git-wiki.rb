@@ -90,7 +90,7 @@ module GitWiki
       wiki_name = "Context#{example.context}" if example.context
       if wiki_name
         begin
-          res.fill_from_git wiki_name
+          res.fill_from_git wiki_name, true
         rescue PageNotFound => p
           res.example.desc = "PAGE NOT FOUND #{p.name}"
         end
@@ -104,16 +104,24 @@ module GitWiki
       self.tasks = []
     end
 
-    def fill_from_string(content)
+    def fill_from_string(content, recursive = false)
       content.each_line do |line|
         task = Task.parse(line) # try every line as a task decription
-        tasks << task unless task.nil?
+        if !task.nil?
+          if task.include_statement? && recursive
+            puts "  recursively including #{task.desc}"
+            list = TaskList.from_example(task)
+            self.tasks = self.tasks + list.tasks
+          else
+            tasks << task
+          end
+        end
       end
     end
 
-    def fill_from_git(page)
+    def fill_from_git(page, recursive = false)
       p = Page.find(page)
-      fill_from_string(p.content) if p
+      fill_from_string(p.content, recursive) if p
     end
 
     def fill_from_url(url)
