@@ -25,6 +25,63 @@ module GitWiki
     end
   end
 
+  class Task
+    attr_accessor :orig_string, :start, :attributes_str, :attributes, :desc
+
+    TAGGED_VALUE_REGEX = /\s+(\w+)\:(\w+)/
+
+    def self.parse(from_string)
+      t = Task.new
+      t.orig_string = from_string
+      return nil unless t.orig_string =~
+        /^((?: DO|TODO|DONE):?\b)    # 1:TODO with optional colon
+        (#{TAGGED_VALUE_REGEX}+\s)?  # tagged values 2:, 3:, 4:
+        (.*)                         # 5:title
+        /x
+      t.start = $1
+      t.attributes_str = $2
+      t.desc = $+
+
+      puts
+      puts from_string
+      puts $~.inspect
+      if $2
+        puts "  " + $2.scan(TAGGED_VALUE_REGEX).inspect
+      end
+
+        require 'pp'
+      pp t
+      t
+    end
+
+    def to_html
+      html = "<span style='font-weight:bold'>#{start}</span>#{attributes_str}#{desc}"
+      html = "<del>#{html}</del>" if done?
+      "<div class='todo'>#{html}</div>"
+    end
+
+    def done?
+      start =~ /DONE/
+    end
+
+    def project
+    end
+
+    def context
+    end
+  end
+
+  class TaskList
+    def self.from_git()
+    end
+
+    def self.from_url()
+    end
+
+    def filter(example)
+    end
+  end
+
   class Page
     def self.find_all
       return [] if repository.tree.contents.empty?
@@ -86,18 +143,16 @@ module GitWiki
     end
 
     def inject_todo(orig)
-      orig.gsub /^((?: DO|TODO|DONE):?\b)    # 1:TODO with optional colon
-      (?: (?: \s(\w+)\:(\w+))+\s)?         # tagged values 2:key 3:value
-      (.*)                                 # 4:title
-      /x do
-        res = "<span style='font-weight:bold'>#{$1}</span>#{$+}"
-        res = "<del>#{res}</del>" if $1 == 'DONE'
-        "<div class='todo'>#{res}</div>"
+      res = []
+      orig.each_line do |line|
+        task = Task.parse(line) # try every line as a task decription
+        res << (task.nil? ? line : task.to_html)
       end
+      res.join
     end
 
     def inject_links(orig)
-      orig
+      orig # disable wiki words
     end
 
     def to_s
