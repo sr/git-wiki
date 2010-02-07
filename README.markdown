@@ -35,7 +35,13 @@ like to remember.
 
 You can include tasks from other wiki pages. So it is possible to have
 one separate page per project, e.g. ProjectGitWiki, ProjectWorkflow and
-to aggregate all coding tasks on one, say ContextCoding page.
+to aggregate all coding tasks on one, say ContextCoding page with
+`INCLUDE project:GitWiki`, `INCLUDE project:Workflow`. 
+
+You can also reference other contexts with `INCLUDE context:AtHome`.
+
+Recursion can be turned on with `INCLUDE context:AtHome recursive:true`.
+It is off by default.
 
 You can also reference a source on the web. I prefer to manage my tasks
 related to git-wiki development in this README file. So on my
@@ -45,7 +51,7 @@ http://github.com/geekq/git-wiki/raw/master/README.markdown`
 * DONE: include via http
 * DONE: recursive inclusion
 * DONE: mark included tasks in special way
-* TODO: switch recursion on or off
+* DONE: switch recursion on or off
 * DONE: avoid endless recursion by saving a list of visited nodes
 * TODO: include a task list filtered by tagged value, e.g.  `TASKS context:home` should list all the tasks for the specified context.
 * DONE: allow optional asterisk in front of TODO

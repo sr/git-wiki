@@ -241,7 +241,8 @@ module GitWiki
         if task.nil?
           res << line
         elsif task.include_statement?
-          list = TaskList.from_example(task, ["/#{name}"])
+          recursive = task[:recursive] == 'true' ? ["/#{name}"] : nil
+          list = TaskList.from_example(task, recursive)
           res << list.to_html
         else
           res << task.to_html
