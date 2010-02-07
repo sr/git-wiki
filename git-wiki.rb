@@ -88,17 +88,22 @@ module GitWiki
     end
   end
 
+  # List of todo tasks
   class TaskList
     attr_accessor :example, :tasks
 
-    def self.from_example(example)
+    # @example [Task] contains attributes for task filtering ("filter by example"),
+    #                 also defines the source of the tasks (Wiki-Name or url)
+    # @recursive_origins [string Array] nil for no recursion or an array of already
+    #                              visited nodes; needed to avoid endless recursion
+    def self.from_example(example, recursive_origins = nil)
       res = TaskList.new
       res.example = example
       wiki_name = "Project#{example.project}" if example.project
       wiki_name = "Context#{example.context}" if example.context
       if wiki_name
         begin
-          res.fill_from_git wiki_name, true
+          res.fill_from_git wiki_name, recursive_origins
         rescue PageNotFound => p
           res.example.desc = "PAGE NOT FOUND #{p.name}"
         end
@@ -112,14 +117,20 @@ module GitWiki
       self.tasks = []
     end
 
-    def fill_from_string(content, origin, recursive = false)
+    def fill_from_string(content, origin_view, origin_edit = nil, recursive_origins = nil)
+      # avoid endless recursion
+      if recursive_origins && recursive_origins.include?(origin_view)
+        puts "Breaking endless recursion #{recursive_origins.inspect}"
+        return
+      end
+      recursive_origins << origin_view if recursive_origins
+
       content.each_line do |line|
         task = Task.parse(line) # try every line as a task decription
         if !task.nil?
-          task.origin = origin
-          if task.include_statement? && recursive
-            puts "  recursively including #{task.desc}"
-            list = TaskList.from_example(task)
+          task.origin = origin_edit || origin_view
+          if task.include_statement? && recursive_origins
+            list = TaskList.from_example(task, recursive_origins)
             self.tasks = self.tasks + list.tasks
           else
             tasks << task
@@ -128,10 +139,9 @@ module GitWiki
       end
     end
 
-    def fill_from_git(page, recursive = false)
+    def fill_from_git(page, recursive_origins = nil)
       p = Page.find(page)
-      puts "SRC #{page}"
-      fill_from_string(p.content, "/#{page}/edit", recursive) if p
+      fill_from_string(p.content, "/#{page}", "/#{page}/edit", recursive_origins) if p
     end
 
     def fill_from_url(url)
@@ -222,7 +232,7 @@ module GitWiki
         if task.nil?
           res << line
         elsif task.include_statement?
-          list = TaskList.from_example(task)
+          list = TaskList.from_example(task, ["/#{name}"])
           res << list.to_html
         else
           res << task.to_html
