@@ -27,8 +27,8 @@ original git-wiki).
 
 ### Integrated TODO list(s)
 
-Just write TODO or DONE at the beginning of a line with task you would like to
-remember.
+Just write TODO or DONE at the beginning of a line with task you would
+like to remember.
 
 
 #### Inclusion
@@ -51,6 +51,7 @@ http://github.com/geekq/git-wiki/raw/master/README.markdown`
 * DONE: allow optional asterisk in front of TODO
 * TODO: group included lists by project
 * TODO: merge and resort tasks from subsequent INCLUDE statements
+* DONE: gather all tasks from all pages with `INCLUDE wiki:all`
 * TODO: gather all the remaining (not referenced) tasks into `task inventory` page
 
 ### No wiki words
@@ -72,18 +73,6 @@ ActiveRecord but appear as it is.
 * IDEA: support for special programmed pages - via haml or liquid template engine
 
 
-Original README by Simon Rozet
-------------------------------
-
-I wrote git-wiki as a quick and dirty hack, mostly to play with Sinatra.
-It turned out that Sinatra is an awesome little web framework and that this
-hack isn't as useless as I first though since I now use it daily.
-
-However, it is definitely not feature rich and will probably never be because
-I mostly use it as a web frontend for `git`, `ls` and `vim`.
-
-If you want history, search, etc. you should look at other people's [forks][].
-
 Install
 -------
 
@@ -93,6 +82,7 @@ The following [gems][] are required to run git-wiki:
 - [mojombo-grit][]
 - [HAML][]
 - [RDiscount][]
+- [RestClient][]
 
 Run with `mkdir ~/wiki && (cd ~/wiki && git init) && ./run.ru -sthin -p4567`
 and point your browser at <http://0.0.0.0:4567/>. Enjoy!
@@ -113,6 +103,7 @@ See also
   [mojombo-grit]: http://github.com/mojombo/grit
   [HAML]: http://haml.hamptoncatlin.com
   [RDiscount]: http://github.com/rtomayko/rdiscount
+  [RestClient]: http://github.com/archiloque/rest-client 
   [tip]: http://wiki.infogami.com/using_lynx_&_vim_with_infogami
   [WiGit]: http://el-tramo.be/software/wigit
   [ikiwiki]: http://ikiwiki.info

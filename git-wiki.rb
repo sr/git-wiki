@@ -99,16 +99,22 @@ module GitWiki
     def self.from_example(example, recursive_origins = nil)
       res = TaskList.new
       res.example = example
-      wiki_name = "Project#{example.project}" if example.project
-      wiki_name = "Context#{example.context}" if example.context
-      if wiki_name
-        begin
-          res.fill_from_git wiki_name, recursive_origins
-        rescue PageNotFound => p
-          res.example.desc = "PAGE NOT FOUND #{p.name}"
-        end
-      elsif example.desc =~ /^http/
+
+      if example[:wiki] == 'all' # load all tasks from all wiki pages
+        Page.find_all.each {|p| puts "loading #{p.name}"; res.fill_from_git p.name, recursive_origins}
+      elsif example.desc =~ /^http/ # load by url
         res.fill_from_url(example.desc) rescue res.example.desc "CAN NOT RETRIEVE URL"
+      else # load from one wiki page
+        wiki_name = "Project#{example.project}" if example.project
+        wiki_name = "Context#{example.context}" if example.context
+        wiki_name = example[:wiki] if example[:wiki]
+        if wiki_name
+          begin
+            res.fill_from_git wiki_name, recursive_origins
+          rescue PageNotFound => p
+            res.example.desc = "PAGE NOT FOUND #{p.name}"
+          end
+        end
       end
       res
     end
@@ -168,7 +174,10 @@ module GitWiki
   class Page
     def self.find_all
       return [] if repository.tree.contents.empty?
-      repository.tree.contents.collect { |blob| new(blob) }.sort_by {|page| page.name.downcase}
+      repository.tree.contents.
+        select {|blob| File.extname(blob.name) == GitWiki.extension }.
+        collect {|blob| new(blob)}.
+        sort_by {|page| page.name.downcase}
     end
 
     def self.find(name)
