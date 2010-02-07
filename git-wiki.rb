@@ -29,7 +29,7 @@ module GitWiki
   end
 
   class Task
-    attr_accessor :orig_string, :start, :attributes_str, :attributes, :desc, :origin
+    attr_accessor :orig_string, :start, :orig_attributes_str, :attributes, :desc, :origin
 
     TAGGED_VALUE_REGEX = /(\w+)\:(\w+)\s+/
 
@@ -43,7 +43,7 @@ module GitWiki
         (.*)                              # 5:title
         /x
       t.start = $1
-      t.attributes_str = $2
+      t.orig_attributes_str = $2
       t.desc = $+.strip
 
       t.attributes = []
@@ -53,7 +53,8 @@ module GitWiki
     end
 
     def inner_html
-      html = "<span style='font-weight:bold'>#{start}</span>#{attributes_str}#{desc}"
+      attr_str = attributes.map{|key, value| "#{key}:#{value} "}.join
+      html = "<span style='font-weight:bold'>#{start}</span>#{attr_str}#{desc}"
       html = "<del>#{html}</del>" if done?
       html
     end
@@ -88,9 +89,15 @@ module GitWiki
     end
   end
 
+  Origin = Struct.new(:name, :view_url, :edit_url, :attributes) # referencing (parent) page
+
   # List of todo tasks
   class TaskList
     attr_accessor :example, :tasks
+
+    def initialize
+      self.tasks = []
+    end
 
     # @example [Task] contains attributes for task filtering ("filter by example"),
     #                 also defines the source of the tasks (Wiki-Name or url)
@@ -99,18 +106,21 @@ module GitWiki
     def self.from_example(example, recursive_origins = nil)
       res = TaskList.new
       res.example = example
+      merge_attributes = {}
+      merge_attributes[:project] = example.project if example.project
+      merge_attributes[:context] = example.context if example.context
 
       if example[:wiki] == 'all' # load all tasks from all wiki pages
-        Page.find_all.each {|p| puts "loading #{p.name}"; res.fill_from_git p.name, recursive_origins}
+        Page.find_all.each {|p| puts "loading #{p.name}"; res.fill_from_git p.name, merge_attributes, recursive_origins}
       elsif example.desc =~ /^http/ # load by url
-        res.fill_from_url(example.desc) rescue res.example.desc "CAN NOT RETRIEVE URL"
+        res.fill_from_url(example.desc, merge_attributes) rescue res.example.desc "CAN NOT RETRIEVE URL"
       else # load from one wiki page
         wiki_name = "Project#{example.project}" if example.project
         wiki_name = "Context#{example.context}" if example.context
         wiki_name = example[:wiki] if example[:wiki]
         if wiki_name
           begin
-            res.fill_from_git wiki_name, recursive_origins
+            res.fill_from_git wiki_name, merge_attributes, recursive_origins
           rescue PageNotFound => p
             res.example.desc = "PAGE NOT FOUND #{p.name}"
           end
@@ -119,22 +129,44 @@ module GitWiki
       res
     end
 
-    def initialize
-      self.tasks = []
+    def self.derive_attributes_from_page_name(name)
+      res = {}
+      res[:project] = $1 if name =~ /Project(\w+)/
+      res[:context] = $1 if name =~ /Context(\w+)/
+      res
     end
 
-    def fill_from_string(content, origin_view, origin_edit = nil, recursive_origins = nil)
+    def fill_from_git(page, merge_attributes = {}, recursive_origins = nil)
+      if p = Page.find(page)
+        attrs = TaskList.derive_attributes_from_page_name(p.name)
+        o = Origin.new(page, "/#{page}", "/#{page}/edit", attrs.merge(merge_attributes))
+        fill_from_string(p.content, attrs, o, recursive_origins)
+      end
+    end
+
+    def fill_from_url(url, merge_attributes = {})
+      require 'rest_client'
+      content = RestClient.get(url) rescue 'Content could not be retrieved.'
+      o = Origin.new(url, url, nil)
+      fill_from_string(content, merge_attributes, o)
+    end
+
+    def fill_from_string(content, merge_attributes, origin, recursive_origins = nil)
       # avoid endless recursion
-      if recursive_origins && recursive_origins.include?(origin_view)
+      if recursive_origins && recursive_origins.detect?{|o| o.name == origin.name}
         puts "Breaking endless recursion #{recursive_origins.inspect}"
         return
       end
-      recursive_origins << origin_view if recursive_origins
+      recursive_origins << origin if recursive_origins
 
       content.each_line do |line|
         task = Task.parse(line) # try every line as a task decription
         if !task.nil?
-          task.origin = origin_edit || origin_view
+          puts "merge_attr #{merge_attributes.inspect}"
+          merge_attributes.each do |key, value|
+            task.attributes << [key, value] unless task[key]
+          end
+          task.origin = origin.edit_url || origin.view_url
           if task.include_statement? && recursive_origins
             list = TaskList.from_example(task, recursive_origins)
             self.tasks = self.tasks + list.tasks
@@ -143,17 +175,6 @@ module GitWiki
           end
         end
       end
-    end
-
-    def fill_from_git(page, recursive_origins = nil)
-      p = Page.find(page)
-      fill_from_string(p.content, "/#{page}", "/#{page}/edit", recursive_origins) if p
-    end
-
-    def fill_from_url(url)
-      require 'rest_client'
-      content = RestClient.get(url) rescue 'Content could not be retrieved.'
-      fill_from_string(content, url)
     end
 
     def filter(example)
