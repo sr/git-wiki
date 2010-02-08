@@ -1,5 +1,6 @@
 require "sinatra/base"
 require "haml"
+require "sass"
 require "grit"
 require "rdiscount"
 require "rexml/document"
@@ -50,6 +51,10 @@ module GitWiki
       "exists"
     rescue PageNotFound
       "unknown"
+    end
+
+    def self.history
+      repository.commits
     end
 
     def self.repository
@@ -143,7 +148,11 @@ module GitWiki
     end
 
     before do
-      content_type "text/html", :charset => "utf-8"
+    end
+
+    get "/styles.css" do
+      content_type "text/css", :charset => "utf-8"
+      sass :styles
     end
 
     get "/" do
@@ -155,10 +164,20 @@ module GitWiki
       haml :list
     end
 
+    get "/commits" do
+      @commits = Page.history
+      haml :commits
+    end
+
     get "/:page/edit" do
       @page = Page.find_or_create(params[:page])
       haml :edit
     end
+
+    #get "/:page/history" do
+    #  @page = Page.history
+    #  haml :history
+    #end
 
     get "/:page" do
       @page = Page.find(params[:page])
@@ -170,6 +189,7 @@ module GitWiki
       @page.update_content(params[:body])
       redirect "/#{@page}"
     end
+
 
     private
       def title(title=nil)
@@ -190,20 +210,27 @@ __END__
 %html
   %head
     %title= title
-    %style{ :type=> "text/css" } .unknown { color:red; }
-    %script{ :type=> "text/javascript", :src=> "/s/js/jquery/dist/jquery.min.js" }
+    %script{ :type=> "text/javascript", :src=> "/s/js/jquery/jquery-1.3.2.min.js" }
+    %link{ :rel=> "stylesheet", :type=> "text/css", :href=> "/s/css/yui.reset.css" }
+    %link{ :href=> "/styles.css", :media=> 'all', :type=> "text/css", :rel=> "stylesheet" }
   %body
-    %ul
+    %ul{:id=> 'header-menu'}
       %li
         %a{ :href => "/#{GitWiki.homepage}" } Home
       %li
         %a{ :href => "/pages" } All pages
-    #content= yield
+      %li
+        %a{ :href => "/commits" } Commits
+    #container= yield
 
 @@ show
 - title @page.name
-#edit
-  %a{:href => "/#{@page}/edit"} Edit this page
+#page-controls
+  %ul
+    %li
+      %a{:href => "/#{@page}/edit"} Edit this page
+    %li
+      %a{:href => "/#{@page}/history"} History
 %h1= title
 #content
   ~"#{@page.to_html}"
@@ -228,3 +255,13 @@ __END__
   %ul#list
     - @pages.each do |page|
       %li= list_item(page)
+
+@@ commits
+- title "Listing commits"
+%h1 All commits
+- if @commits.empty?
+  %p No commits found.
+- else
+  %ul#list
+    - @commits.each do |commit|
+      %li= commit.id << " " << commit.authored_date.to_s
