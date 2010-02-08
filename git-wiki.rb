@@ -1,12 +1,8 @@
 require "rubygems"
 require "sinatra/base"
 require "haml"
-require "sass"
 require "grit"
 require "rdiscount"
-require "rexml/document"
-require "rack-xslview"
-require "rack-docunext-content-length"
 
 require 'pp' # TODO: remove
 require 'ruby-debug' # TODO: remove
@@ -224,10 +220,6 @@ module GitWiki
       "unknown"
     end
 
-    def self.history
-      repository.commits
-    end
-
     def self.repository
       GitWiki.repository || raise
     end
@@ -321,20 +313,9 @@ module GitWiki
       def commit_message
         new? ? "Created #{name}" : "Updated #{name}"
       end
-
-      def wiki_link(str)
-        str.gsub(/\[\[([^\]]+\]\])/) { |page|
-            file = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9]/,'_');
-            linktext = page.gsub('[','').gsub(']','');
-            %Q{<a class="#{self.class.css_class_for(file)}" } +
-            %Q{href="/#{file}">#{linktext}</a>}
-        }
-      end
   end
 
   class App < Sinatra::Base
-    set :public, File.dirname(__FILE__) + '/public'
-    set :static, true
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
@@ -346,11 +327,7 @@ module GitWiki
     end
 
     before do
-    end
-
-    get "/styles.css" do
-      content_type "text/css", :charset => "utf-8"
-      sass :styles
+      content_type "text/html", :charset => "utf-8"
     end
 
     get "/" do
@@ -362,9 +339,6 @@ module GitWiki
       haml :list
     end
 
-    get "/commits" do
-      @commits = Page.history
-      haml :commits
     get "/img/*" do
       git_obj = GitWiki.repository.tree/'img'
       params[:splat].each do |part|
@@ -380,11 +354,6 @@ module GitWiki
       @global_style = 'vimlike'
       haml :edit
     end
-
-    #get "/:page/history" do
-    #  @page = Page.history
-    #  haml :history
-    #end
 
     get "/:page" do
       @page = Page.find(params[:page])
@@ -412,13 +381,12 @@ module GitWiki
 
     private
       def title(title=nil)
-        @title = title.to_s.gsub('_',' ').gsub(/\b\w+/){$&.capitalize} unless title.nil?
+        @title = title.to_s unless title.nil?
         @title
       end
 
       def list_item(page)
-        title = page.name.gsub('_',' ').gsub(/\b\w+/){$&.capitalize}
-        %Q{<a class="page_name" href="/#{page}">#{title}</a>}
+        %Q{<a class="page_name" href="/#{page}">#{page.name}</a>}
       end
   end
 end
@@ -429,12 +397,6 @@ __END__
 %html
   %head
     %title= title
-    %script{ :type=> "text/javascript", :src=> "/s/js/jquery/jquery-1.3.2.min.js" }
-    %link{ :rel=> "stylesheet", :type=> "text/css", :href=> "/s/css/yui.reset.css" }
-    %link{ :href=> "/styles.css", :media=> 'all', :type=> "text/css", :rel=> "stylesheet" }
-  %body
-    %ul{:id=> 'header-menu'}
-=======
     %style
       :sass
         del
@@ -510,26 +472,11 @@ __END__
       %li
         %a.service{ :href => "/#{GitWiki.homepage}" } Home
       %li
-        %a{ :href => "/pages" } All pages
-      %li
-        %a{ :href => "/commits" } Commits
-    #container= yield
-
-@@ show
-- title @page.name
-#page-controls
-  %ul
-    %li
-      %a{:href => "/#{@page}/edit"} Edit this page
-    %li
-      %a{:href => "/#{@page}/history"} History
-%h1= title
         %a.service{ :href => "/pages" } All pages
     = yield
 
 @@ show
 - title @page.name
->>>>>>> upstream/master
 #content
   ~"#{@page.to_html}"
 #page_navigation
@@ -561,13 +508,3 @@ __END__
   %ul#list
     - @pages.each do |page|
       %li= list_item(page)
-
-@@ commits
-- title "Listing commits"
-%h1 All commits
-- if @commits.empty?
-  %p No commits found.
-- else
-  %ul#list
-    - @commits.each do |commit|
-      %li= commit.id << " " << commit.authored_date.to_s
