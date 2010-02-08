@@ -1,5 +1,6 @@
 require "sinatra/base"
 require "haml"
+require "sass"
 require "grit"
 require "rdiscount"
 require "rack-xslview"
@@ -146,7 +147,11 @@ module GitWiki
     end
 
     before do
-      content_type "text/html", :charset => "utf-8"
+    end
+
+    get "/styles.css" do
+      content_type "text/css", :charset => "utf-8"
+      sass :styles
     end
 
     get "/" do
@@ -184,6 +189,7 @@ module GitWiki
       redirect "/#{@page}"
     end
 
+
     private
       def title(title=nil)
         @title = title.to_s.gsub('_',' ').gsub(/\b\w+/){$&.capitalize} unless title.nil?
@@ -203,23 +209,26 @@ __END__
 %html
   %head
     %title= title
-    %style{ :type=> "text/css" } .unknown { color:red; }
     %script{ :type=> "text/javascript", :src=> "/s/js/jquery/jquery-1.3.2.min.js" }
+    %link{ :rel=> "stylesheet", :type=> "text/css", :href=> "/s/css/yui.reset.css" }
+    %link{ :href=> "/styles.css", :media=> 'all', :type=> "text/css", :rel=> "stylesheet" }
   %body
-    %ul
+    %ul{:id=> 'header-menu'}
       %li
         %a{ :href => "/#{GitWiki.homepage}" } Home
       %li
         %a{ :href => "/pages" } All pages
         %a{ :href => "/commits" } Commits
-    #content= yield
+    #container= yield
 
 @@ show
 - title @page.name
-#edit
-  %a{:href => "/#{@page}/edit"} Edit this page
-#history
-  %a{:href => "/#{@page}/history"} History
+#page-controls
+  %ul
+    %li
+      %a{:href => "/#{@page}/edit"} Edit this page
+    %li
+      %a{:href => "/#{@page}/history"} History
 %h1= title
 #content
   ~"#{@page.to_html}"
