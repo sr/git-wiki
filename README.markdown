@@ -1,28 +1,94 @@
-git-wiki: because who needs cool names when you use git?
-========================================================
+git-wiki
+========
 
-git-wiki is a wiki that relies on git to keep pages' history
-and [Sinatra][] to serve them.
+git-wiki is a wiki that relies on git to keep pages' history and
+[Sinatra][] to serve them.  This geek brain overlay system aims to
+replace trac (wiki and ticket system), a CMS and sticky notes.
 
-I wrote git-wiki as a quick and dirty hack, mostly to play with Sinatra.
-It turned out that Sinatra is an awesome little web framework and that this
-hack isn't as useless as I first though since I now use it daily.
+Features of this fork (by geekQ)
+---------------------
 
-However, it is definitely not feature rich and will probably never be because
-I mostly use it as a web frontend for `git`, `ls` and `vim`.
+### Support for images
 
-If you want history, search, etc. you should look at other people's [forks][],
-especially [al3x][]'s one.
+You can add images to `/img` folder of your git repository. Subfolders
+are also supported. At least gif, png and jpg supported - content type
+is set automatically by Sinatra. You can reference the images then from
+your wiki pages like `![My picture](/img/2009/my_picture.jpg)`
+
+No web interface at this time - use `git commit`.
+
+
+### Custom h1 header
+
+If your wiki page contains a markdown h1 header, then this one is used
+on the page. If not, then h1 is created out of the file name (as in
+original git-wiki).
+
+
+### Integrated TODO list(s)
+
+Just write TODO or DONE at the beginning of a line with task you would
+like to remember.
+
+
+#### Inclusion
+
+You can include tasks from other wiki pages. So it is possible to have
+one separate page per project, e.g. ProjectGitWiki, ProjectWorkflow and
+to aggregate all coding tasks on one, say ContextCoding page with
+`INCLUDE project:GitWiki`, `INCLUDE project:Workflow`. 
+
+You can also reference other contexts with `INCLUDE context:AtHome`.
+
+Recursion can be turned on with `INCLUDE context:AtHome recursive:true`.
+It is off by default.
+
+You can also reference a source on the web. I prefer to manage my tasks
+related to git-wiki development in this README file. So on my
+ContextCoding page I have following reference: `INCLUDE
+http://github.com/geekq/git-wiki/raw/master/README.markdown`
+
+* DONE: include via http
+* DONE: recursive inclusion
+* DONE: mark included tasks in special way
+* DONE: switch recursion on or off
+* DONE: avoid endless recursion by saving a list of visited nodes
+* TODO: include a task list filtered by tagged value, e.g.  `TASKS context:home` should list all the tasks for the specified context.
+* DONE: allow optional asterisk in front of TODO
+* TODO: group included lists by project
+* TODO: merge and resort tasks from subsequent INCLUDE statements
+* DONE: gather all tasks from all pages with `INCLUDE wiki:all`
+* TODO: gather all the remaining (not referenced) tasks into `task inventory` page
+
+### No wiki words
+
+For a hacker the wiki words is more a distraction than a help. Example:
+if I mention ActiveRecord, than it should not link to the wiki article
+ActiveRecord but appear as it is.
+
+* DONE: do not rely on wiki words
+
+### Other plans
+
+* TODO: keyboard short cuts for edit and saving
+* TODO: check dead links
+* TODO: search engine
+* IDEA: presentation system - markdown + my S5 alternative
+* IDEA: support for attachments
+* IDEA: support for deeper Wiki page folder structure
+* IDEA: support for special programmed pages - via haml or liquid template engine
+
 
 Install
 -------
 
-The fellowing [gems][] are required to run git-wiki:
+The following [gems][] are required to run git-wiki:
 
 - [Sinatra][]
 - [mojombo-grit][]
 - [HAML][]
 - [RDiscount][]
+- [RestClient][]
 
 Run with `mkdir ~/wiki && (cd ~/wiki && git init) && ./run.ru -sthin -p4567`
 and point your browser at <http://0.0.0.0:4567/>. Enjoy!
@@ -43,6 +109,7 @@ See also
   [mojombo-grit]: http://github.com/mojombo/grit
   [HAML]: http://haml.hamptoncatlin.com
   [RDiscount]: http://github.com/rtomayko/rdiscount
+  [RestClient]: http://github.com/archiloque/rest-client 
   [tip]: http://wiki.infogami.com/using_lynx_&_vim_with_infogami
   [WiGit]: http://el-tramo.be/software/wigit
   [ikiwiki]: http://ikiwiki.info
@@ -84,17 +151,21 @@ then sync your changes back when you're done.</p>
 Git is the next Unix</a></cite></p>
 </blockquote>
 
-Licence
--------
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-                       Version 2, December 2004
 
-    Copyright (C) 2008 Simon Rozet <simon@rozet.name>
-    Everyone is permitted to copy and distribute verbatim or modified
-    copies of this license document, and changing it is allowed as long
-    as the name is changed.
+MIT license
+-----------
+Copyright (c) 2009 Vladimir Dobriakov, vladimir.dobriakov@innoq.com
 
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-      TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
-     0. You just DO WHAT THE FUCK YOU WANT TO.
+Copyright (c) Simon Rozet
+ 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+ 
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+ 
