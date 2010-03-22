@@ -125,7 +125,7 @@ module GitWiki
 
       def wiki_link(str)
         str.gsub(/\[\[([^\]]+\]\])/) { |page|
-            file = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9]/,'_');
+            file = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9\/]/,'_');
             linktext = page.gsub('[','').gsub(']','');
             %Q{<a class="#{self.class.css_class_for(file)}" } +
             %Q{href="/#{file}">#{linktext}</a>}
@@ -139,11 +139,11 @@ module GitWiki
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
-    use_in_file_templates!
+    enable :inline_templates
 
     error PageNotFound do
       page = request.env["sinatra.error"].name
-      redirect "/#{page}/edit"
+      redirect "/#{page}?edit=1"
     end
 
     before do
@@ -168,23 +168,26 @@ module GitWiki
       haml :commits
     end
 
-    get "/:page/edit" do
-      @page = Page.find_or_create(params[:page])
-      haml :edit
-    end
 
     #get "/:page/history" do
     #  @page = Page.history
     #  haml :history
     #end
 
-    get "/:page" do
-      @page = Page.find(params[:page])
-      haml :show
+    get "/*" do
+      path = params[:splat].join('/')
+      if not params[:edit].nil?
+        @page = Page.find_or_create(path)
+        haml :edit
+      else
+        @page = Page.find(path)
+        haml :show
+      end
     end
 
     post "/:page" do
-      @page = Page.find_or_create(params[:page])
+      path = params[:splat].join('/')
+      @page = Page.find_or_create(path)
       @page.update_content(params[:body])
       redirect "/#{@page}"
     end
@@ -209,7 +212,7 @@ __END__
 %html
   %head
     %title= title
-    %script{ :type=> "text/javascript", :src=> "/s/js/jquery/jquery-1.3.2.min.js" }
+    %script{ :type=> "text/javascript", :src=> "http://www-01.evenserver.com/s/js/jquery/jquery-1.4.2.min.js" }
     %link{ :rel=> "stylesheet", :type=> "text/css", :href=> "/s/css/yui.reset.css" }
     %link{ :href=> "/styles.css", :media=> 'all', :type=> "text/css", :rel=> "stylesheet" }
   %body
