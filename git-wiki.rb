@@ -125,10 +125,14 @@ module GitWiki
 
       def wiki_link(str)
         str.gsub(/\[\[([^\]]+\]\])/) { |page|
+          puts self
             file = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9\/]/,'_');
             linktext = page.gsub('[','').gsub(']','');
+            if linktext.include?('/')
+              linktext = linktext.split('/').pop
+            end
             %Q{<a class="#{self.class.css_class_for(file)}" } +
-            %Q{href="/#{file}">#{linktext}</a>}
+            %Q{href="#{file}">#{linktext}</a>}
         }
       end
   end
