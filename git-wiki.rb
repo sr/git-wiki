@@ -6,6 +6,10 @@ require "rdiscount"
 require "rack-xslview"
 require "rack-docunext-content-length"
 
+require "git_wiki/page_not_found"
+require "git_wiki/page"
+require "git_wiki/app"
+
 module GitWiki
   class << self
     attr_accessor :homepage, :extension, :repository
@@ -18,6 +22,7 @@ module GitWiki
 
     App
   end
+<<<<<<< .merge_file_ijSDrZ
 
   class PageNotFound < Sinatra::NotFound
     attr_reader :name
@@ -268,3 +273,6 @@ __END__
   %ul#list
     - @commits.each do |commit|
       %li= commit.id << " " << commit.authored_date.to_s
+=======
+end
+>>>>>>> .merge_file_aq0LTY
