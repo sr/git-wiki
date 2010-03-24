@@ -1,0 +1,10 @@
+- title @page.name
+#page-controls
+  %ul
+    %li
+      %a{:href => "/#{@page}/edit"} Edit this page
+    %li
+      %a{:href => "/#{@page}/history"} History
+%h1= title
+#content
+  ~"#{@page.to_html}"

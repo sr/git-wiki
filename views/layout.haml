@@ -1,0 +1,16 @@
+!!!
+%html
+  %head
+    %title= title
+    %script{ :type=> "text/javascript", :src=> "http://www-01.evenserver.com/s/js/jquery/jquery-1.4.2.min.js" }
+    %link{ :rel=> "stylesheet", :type=> "text/css", :href=> "/s/css/yui.reset.css" }
+    %link{ :href=> "/styles.css", :media=> 'all', :type=> "text/css", :rel=> "stylesheet" }
+  %body
+    %ul{:id=> 'header-menu'}
+      %li
+        %a{ :href => "/#{GitWiki.homepage}" } Home
+      %li
+        %a{ :href => "/pages" } All pages
+      %li
+        %a{ :href => "/commits" } Commits
+    #container= yield

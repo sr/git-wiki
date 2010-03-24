@@ -1,0 +1,8 @@
+- title "Listing pages"
+%h1 All pages
+- if @pages.empty?
+  %p No pages found.
+- else
+  %ul#list
+    - @pages.each do |page|
+      %li= list_item(page)
