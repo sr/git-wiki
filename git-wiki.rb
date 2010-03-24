@@ -8,7 +8,6 @@ require "rack-docunext-content-length"
 
 require "git_wiki/page_not_found"
 require "git_wiki/page"
-require "git_wiki/app"
 
 module GitWiki
   class << self
@@ -22,121 +21,8 @@ module GitWiki
 
     App
   end
-<<<<<<< .merge_file_ijSDrZ
 
-  class PageNotFound < Sinatra::NotFound
-    attr_reader :name
 
-    def initialize(name)
-      @name = name
-    end
-  end
-
-  class Page
-    def self.find_all
-      return [] if repository.tree.contents.empty?
-      repository.tree.contents.collect { |blob| new(blob) }
-    end
-
-    def self.find(name)
-      page_blob = find_blob(name)
-      raise PageNotFound.new(name) unless page_blob
-      new(page_blob)
-    end
-
-    def self.find_or_create(name)
-      find(name)
-    rescue PageNotFound
-      new(create_blob_for(name))
-    end
-
-    def self.css_class_for(name)
-      find(name)
-      "exists"
-    rescue PageNotFound
-      "unknown"
-    end
-
-    def self.history
-      repository.commits
-    end
-
-    def self.repository
-      GitWiki.repository || raise
-    end
-
-    def self.extension
-      GitWiki.extension || raise
-    end
-
-    def self.find_blob(page_name)
-      repository.tree/(page_name + extension)
-    end
-    private_class_method :find_blob
-
-    def self.create_blob_for(page_name)
-      Grit::Blob.create(repository, {
-        :name => page_name + extension,
-        :data => ""
-      })
-    end
-    private_class_method :create_blob_for
-
-    def initialize(blob)
-      @blob = blob
-    end
-
-    def to_html
-      RDiscount.new(wiki_link(content)).to_html
-    end
-
-    def to_s
-      name
-    end
-
-    def new?
-      @blob.id.nil?
-    end
-
-    def name
-      @blob.name.gsub(/#{File.extname(@blob.name)}$/, '')
-    end
-
-    def content
-      @blob.data
-    end
-
-    def update_content(new_content)
-      return if new_content == content
-      File.open(file_name, "w") { |f| f << new_content }
-      add_to_index_and_commit!
-    end
-
-    private
-      def add_to_index_and_commit!
-        Dir.chdir(self.class.repository.working_dir) {
-          self.class.repository.add(@blob.name)
-        }
-        self.class.repository.commit_index(commit_message)
-      end
-
-      def file_name
-        File.join(self.class.repository.working_dir, name + self.class.extension)
-      end
-
-      def commit_message
-        new? ? "Created #{name}" : "Updated #{name}"
-      end
-
-      def wiki_link(str)
-        str.gsub(/\[\[([^\]]+\]\])/) { |page|
-            file = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9\/]/,'_');
-            linktext = page.gsub('[','').gsub(']','');
-            %Q{<a class="#{self.class.css_class_for(file)}" } +
-            %Q{href="/#{file}">#{linktext}</a>}
-        }
-      end
-  end
 
   class App < Sinatra::Base
     set :public, File.dirname(__FILE__) + '/public'
@@ -144,7 +30,6 @@ module GitWiki
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
-    enable :inline_templates
 
     error PageNotFound do
       page = request.env["sinatra.error"].name
@@ -275,4 +160,3 @@ __END__
       %li= commit.id << " " << commit.authored_date.to_s
 =======
 end
->>>>>>> .merge_file_aq0LTY
