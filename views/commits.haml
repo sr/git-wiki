@@ -1,0 +1,8 @@
+- title "Listing commits"
+%h1 All commits
+- if @commits.empty?
+  %p No commits found.
+- else
+  %ul#list
+    - @commits.each do |commit|
+      %li= commit.id << " " << commit.authored_date.to_s

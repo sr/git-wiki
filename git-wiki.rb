@@ -30,6 +30,7 @@ module GitWiki
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
+    enable :inline_templates
 
     error PageNotFound do
       page = request.env["sinatra.error"].name
@@ -95,68 +96,4 @@ module GitWiki
         %Q{<a class="page_name" href="/#{page}">#{title}</a>}
       end
   end
-end
-
-__END__
-@@ layout
-!!!
-%html
-  %head
-    %title= title
-    %script{ :type=> "text/javascript", :src=> "http://www-01.evenserver.com/s/js/jquery/jquery-1.4.2.min.js" }
-    %link{ :rel=> "stylesheet", :type=> "text/css", :href=> "/s/css/yui.reset.css" }
-    %link{ :href=> "/styles.css", :media=> 'all', :type=> "text/css", :rel=> "stylesheet" }
-  %body
-    %ul{:id=> 'header-menu'}
-      %li
-        %a{ :href => "/#{GitWiki.homepage}" } Home
-      %li
-        %a{ :href => "/pages" } All pages
-      %li
-        %a{ :href => "/commits" } Commits
-    #container= yield
-
-@@ show
-- title @page.name
-#page-controls
-  %ul
-    %li
-      %a{:href => "/#{@page}/edit"} Edit this page
-    %li
-      %a{:href => "/#{@page}/history"} History
-%h1= title
-#content
-  ~"#{@page.to_html}"
-
-@@ edit
-- title "Editing #{@page.name}"
-%h1= title
-%form{:method => 'POST', :action => "/#{@page}"}
-  %p
-    %textarea{:name => 'body', :rows => 30, :style => "width: 100%"}= @page.content
-  %p
-    %input.submit{:type => :submit, :value => "Save as the newest version"}
-    or
-    %a.cancel{:href=>"/#{@page}"} cancel
-
-@@ list
-- title "Listing pages"
-%h1 All pages
-- if @pages.empty?
-  %p No pages found.
-- else
-  %ul#list
-    - @pages.each do |page|
-      %li= list_item(page)
-
-@@ commits
-- title "Listing commits"
-%h1 All commits
-- if @commits.empty?
-  %p No commits found.
-- else
-  %ul#list
-    - @commits.each do |commit|
-      %li= commit.id << " " << commit.authored_date.to_s
-=======
 end
