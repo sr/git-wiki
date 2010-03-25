@@ -4,7 +4,6 @@ require "sass"
 require "grit"
 require "rdiscount"
 require "rack-xslview"
-require "rack-docunext-content-length"
 
 require "git_wiki/page_not_found"
 require "git_wiki/page"
@@ -30,7 +29,6 @@ module GitWiki
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
-    enable :inline_templates
 
     error PageNotFound do
       page = request.env["sinatra.error"].name
@@ -57,6 +55,19 @@ module GitWiki
     get "/commits" do
       @commits = Page.history
       haml :commits
+    end
+    get "/commit-:wiki" do
+      require 'net/ssh'
+
+      stdout = ''
+      Net::SSH.start('192.168.8.103', 'albertlash') do |ssh|
+        # capture only stdout matching a particular pattern
+        ssh.exec!("cd /var/www/svxwikis/#{params[:wiki]} && git pull && ikiwiki --setup /var/www/svxwikis/conf/#{params[:wiki]}.setup --rebuild") do |channel, stream, data|
+          stdout << data if stream == :stdout
+        end
+      end
+      @publish = '<pre>'+stdout+'</pre>'
+      haml :publish
     end
 
 
