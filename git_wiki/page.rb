@@ -150,8 +150,7 @@ module GitWiki
             filename = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9\/]/,'_');
             file = File.dirname(file_name) + '/' + filename
             file.gsub!(self.class.repository.working_dir+'/','')
-            puts file
-            linktext = page.gsub('[','').gsub(']','');
+            linktext = page.gsub('[','').gsub(']','').split('/').pop().capitalize();
             %Q{<a class="#{self.class.css_class_for(file)}" } +
             %Q{href="#{filename}">#{linktext}</a>}
         }
