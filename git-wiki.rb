@@ -3,7 +3,6 @@ require "haml"
 require "sass"
 require "grit"
 require "rdiscount"
-require "rack-xslview"
 
 require "git_wiki/page_not_found"
 require "git_wiki/page"
@@ -61,7 +60,6 @@ module GitWiki
 
       stdout = ''
       Net::SSH.start('192.168.8.103', 'albertlash') do |ssh|
-        # capture only stdout matching a particular pattern
         ssh.exec!("cd /var/www/svxwikis/#{params[:wiki]} && git pull && ikiwiki --setup /var/www/svxwikis/conf/#{params[:wiki]}.setup --rebuild") do |channel, stream, data|
           stdout << data if stream == :stdout
         end
