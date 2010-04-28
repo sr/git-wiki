@@ -3,6 +3,7 @@ require "haml"
 require "sass"
 require "grit"
 require "rdiscount"
+require 'net/ssh'
 
 require "git_wiki/page_not_found"
 require "git_wiki/page"
@@ -26,6 +27,7 @@ module GitWiki
     set :public, File.dirname(__FILE__) + '/public'
     set :static, true
     set :app_file, __FILE__
+    set :user, 'albertlash'
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
 
@@ -56,10 +58,14 @@ module GitWiki
       haml :commits
     end
     get "/commit-:wiki" do
-      require 'net/ssh'
-
-      stdout = ''
-      Net::SSH.start('192.168.8.103', 'albertlash') do |ssh|
+      myar = ['greencomputing','informedblogging']
+      if myar.include?(params[:wiki])
+        host = '192.168.8.2'
+      else
+        host = '192.168.8.103'
+      end
+      stdout = '' << host << "\n"
+      Net::SSH.start(host, settings.user) do |ssh|
         ssh.exec!("cd /var/www/svxwikis/#{params[:wiki]} && git pull && ikiwiki --setup /var/www/svxwikis/conf/#{params[:wiki]}.setup --rebuild") do |channel, stream, data|
           stdout << data if stream == :stdout
         end
