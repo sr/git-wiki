@@ -102,7 +102,23 @@ module GitWiki
 
     private
       def title(title=nil)
-        @title = title.to_s.gsub('_',' ').gsub(/\b\w+/){$&.capitalize} unless title.nil?
+        #@title = title.to_s.gsub('_',' ').gsub(/\b\w+/){$&.capitalize} unless title.nil?
+        unless title.nil?
+          @title = title.to_s
+          if @title.include?('/')
+            @breadc = ''
+            @title = @title.split('/').map! do |path|
+              folder_name = path.gsub('_',' ').gsub(/\b\w+/){$&.capitalize}
+              if @breadc.empty?
+                path = path + '/index'
+              else
+                @breadc.gsub!('/index','')
+              end
+              @breadc << '/' << path
+              %Q{<a class="page_name" href="#{@breadc}">#{folder_name}</a>}
+            end.join('/')
+          end
+        end
         @title
       end
 
