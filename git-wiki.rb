@@ -58,15 +58,15 @@ module GitWiki
       haml :commits
     end
     get "/commit-:wiki" do
-      myar = ['greencomputing','informedblogging']
-      if myar.include?(params[:wiki])
+      myar = ['greencomputing','informedblogging','telecomrebirth','neocarz']
+      unless myar.include?(params[:wiki])
         host = '192.168.8.2'
       else
-        host = '192.168.8.103'
+        host = '192.168.8.2'
       end
       stdout = '' << host << "\n"
       Net::SSH.start(host, settings.user) do |ssh|
-        ssh.exec!("cd /var/www/svxwikis/#{params[:wiki]} && git pull && ikiwiki --setup /var/www/svxwikis/conf/#{params[:wiki]}.setup --rebuild") do |channel, stream, data|
+        ssh.exec!("cd /var/www/svxwikis && git pull && ikiwiki --setup /var/www/svxwikis/conf/#{params[:wiki]}.setup --rebuild") do |channel, stream, data|
           stdout << data if stream == :stdout
         end
       end
