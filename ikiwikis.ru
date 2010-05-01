@@ -1,5 +1,5 @@
-#!/usr/bin/rackup1.8
-require File.dirname(__FILE__) + "/git-wiki"
+#!/var/lib/gems/1.9.1/bin/rackup
+require "./git-wiki"
 
-run GitWiki.new(File.expand_path("~/wikis/"),
+run GitWiki.new("/home/albertlash/wikis/",
   ARGV[2] || ".mdwn", ARGV[3] || "index")

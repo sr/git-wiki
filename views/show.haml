@@ -5,6 +5,6 @@
       %a{:href => "/#{@page}?edit=1"} Edit this page
     %li
       %a{:href => "/#{@page}/history"} History
-%h1= title
+%h1= breadcrumbs(@page.name)
 #content
   ~"#{@page.to_html}"

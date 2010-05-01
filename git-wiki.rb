@@ -28,6 +28,7 @@ module GitWiki
     set :static, true
     set :app_file, __FILE__
     set :user, 'albertlash'
+    set :host, '192.168.8.2'
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
 
@@ -58,12 +59,7 @@ module GitWiki
       haml :commits
     end
     get "/commit-:wiki" do
-      myar = ['greencomputing','informedblogging','telecomrebirth','neocarz']
-      unless myar.include?(params[:wiki])
-        host = '192.168.8.2'
-      else
-        host = '192.168.8.2'
-      end
+      host = settings.host
       stdout = '' << host << "\n"
       Net::SSH.start(host, settings.user) do |ssh|
         ssh.exec!("cd /var/www/svxwikis && git pull && ikiwiki --setup /var/www/svxwikis/conf/#{params[:wiki]}.setup --rebuild") do |channel, stream, data|
@@ -102,12 +98,16 @@ module GitWiki
 
     private
       def title(title=nil)
+        @title = title.to_s.gsub('_',' ').gsub(/\b\w+/){$&.capitalize} unless title.nil?
+        @title
+      end
+      def breadcrumbs(title=nil)
         #@title = title.to_s.gsub('_',' ').gsub(/\b\w+/){$&.capitalize} unless title.nil?
         unless title.nil?
-          @title = title.to_s
-          if @title.include?('/')
+          @bc = title.to_s
+          if @bc.include?('/')
             @breadc = ''
-            @title = @title.split('/').map! do |path|
+            @bc = @bc.split('/').map! do |path|
               folder_name = path.gsub('_',' ').gsub(/\b\w+/){$&.capitalize}
               if @breadc.empty?
                 path = path + '/index'
@@ -119,7 +119,7 @@ module GitWiki
             end.join('/')
           end
         end
-        @title
+        @bc
       end
 
       def list_item(page)
