@@ -77,7 +77,6 @@ module GitWiki
     #end
 
     get "/*" do
-      ObjectSpace.each_object(Sinatra::Base){|o| puts o}
       path = params[:splat].join('/')
       if not params[:edit].nil?
         @page = Page.find_or_create(path)

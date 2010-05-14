@@ -145,11 +145,16 @@ module GitWiki
       end
 
       def wiki_link(str)
-        puts File.dirname(file_name)
         str.gsub(/\[\[([^\]]+\]\])/) { |page|
-            filename = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9:\/\.]/,'_');
-            file = File.expand_path(File.dirname(file_name) + '/' + filename)
-            file.gsub!(self.class.repository.working_dir+'/','')
+            filename = page.downcase.gsub('[','').gsub(']','').gsub(/[^a-z0-9:\/\.]/,'_')
+            if filename =~ /^\//
+                wiki = file_name.gsub(self.class.repository.working_dir,'').split('/')[1]
+                file = wiki + filename
+                filename = '/' + file
+            else
+                file = File.expand_path(File.dirname(file_name) + '/' + filename)
+                file.gsub!(self.class.repository.working_dir+'/','')
+            end
             linktext = page.gsub('[','').gsub(']','').split('/').pop().capitalize();
             %Q{<a class="#{self.class.css_class_for(file)}" id="#{file}" } +
             %Q{href="#{filename}">#{linktext}</a>}
