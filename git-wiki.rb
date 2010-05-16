@@ -50,7 +50,11 @@ module GitWiki
     end
 
     get "/pages" do
+      @exclude = ['.gitignore','conf/cyberpulpit','conf/greencomputing','conf/hungryblogger','conf/informedblogging','conf/informedrealestate','conf/mmwiki','conf/neocarz','conf/neofilmz','conf/nexista','conf/nodows','conf/pbooks','conf/sbinfo','conf/telecomrebirth']
+      @exclude << 'templates/page'
+      @exclude << 'templates/footer'
       @pages = Page.find_all
+      @pages.delete_if {|page| @exclude.include?(page.name) }
       haml :list
     end
 
