@@ -5,6 +5,9 @@
   %p
     %textarea{:name => 'body', :rows => 30, :style => "width: 100%"}= @page.content
   %p
+    %label Commit message
+    %input{:name => 'commit_message', :type => :text, :size => '80'}
+  %p
     %input.submit{:type => :submit, :value => "Save as the newest version"}
     or
     %a.cancel{:href=>"/#{@page}"} cancel

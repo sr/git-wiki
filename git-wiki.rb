@@ -94,26 +94,26 @@ module GitWiki
       @blob.data
     end
 
-    def update_content(new_content)
+    def update_content(new_content, commit_message)
       return if new_content == content
       File.open(file_name, "w") { |f| f << new_content }
-      add_to_index_and_commit!
+      add_to_index_and_commit!(commit_message)
     end
 
     private
-      def add_to_index_and_commit!
+      def add_to_index_and_commit!(message)
         Dir.chdir(self.class.repository.working_dir) {
           self.class.repository.add(@blob.name)
         }
-        self.class.repository.commit_index(commit_message)
+        self.class.repository.commit_index(commit_message(message))
       end
 
       def file_name
         File.join(self.class.repository.working_dir, name + self.class.extension)
       end
 
-      def commit_message
-        new? ? "Created #{name}" : "Updated #{name}"
+      def commit_message(message)
+        message.size > 0 ? message : (new? ? "Created #{name}" : "Updated #{name}")
       end
 
       def wiki_link(str)
@@ -159,7 +159,7 @@ module GitWiki
 
     post "/:page" do
       @page = Page.find_or_create(params[:page])
-      @page.update_content(params[:body])
+      @page.update_content(params[:body], params[:commit_message])
       redirect "/#{@page}"
     end
 
