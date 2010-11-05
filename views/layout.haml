@@ -1,0 +1,12 @@
+!!!
+%html
+  %head
+    %title= title
+    %link{:href => "/stylesheets/default_theme.css", :rel => "stylesheet", :type => "text/css"}
+  %body
+    %ul.main_menu
+      %li
+        %a{ :href => "/#{GitWiki.homepage}" } Home
+      %li
+        %a{ :href => "/pages" } All pages
+    #content= yield

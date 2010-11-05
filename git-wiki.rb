@@ -128,7 +128,6 @@ module GitWiki
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
-    use_in_file_templates!
 
     error PageNotFound do
       page = request.env["sinatra.error"].name
@@ -175,46 +174,3 @@ module GitWiki
       end
   end
 end
-
-__END__
-@@ layout
-!!!
-%html
-  %head
-    %title= title
-  %body
-    %ul
-      %li
-        %a{ :href => "/#{GitWiki.homepage}" } Home
-      %li
-        %a{ :href => "/pages" } All pages
-    #content= yield
-
-@@ show
-- title @page.name
-#edit
-  %a{:href => "/#{@page}/edit"} Edit this page
-%h1= title
-#content
-  ~"#{@page.to_html}"
-
-@@ edit
-- title "Editing #{@page.name}"
-%h1= title
-%form{:method => 'POST', :action => "/#{@page}"}
-  %p
-    %textarea{:name => 'body', :rows => 30, :style => "width: 100%"}= @page.content
-  %p
-    %input.submit{:type => :submit, :value => "Save as the newest version"}
-    or
-    %a.cancel{:href=>"/#{@page}"} cancel
-
-@@ list
-- title "Listing pages"
-%h1 All pages
-- if @pages.empty?
-  %p No pages found.
-- else
-  %ul#list
-    - @pages.each do |page|
-      %li= list_item(page)

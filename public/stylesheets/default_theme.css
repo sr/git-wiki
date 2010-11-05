@@ -1,0 +1,17 @@
+body {
+  font-family: Helvetica, Arial, sans;
+}
+
+a, a:active, a:visited {
+	color: #666;
+}
+
+ul.main_menu {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+ul.main_menu li {
+	display: inline;
+}

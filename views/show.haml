@@ -1,0 +1,8 @@
+- title @page.name
+
+%h1= title
+#content
+  ~"#{@page.to_html}"
+  
+#edit
+  %a{:href => "/#{@page}/edit"} Edit this page
