@@ -128,7 +128,7 @@ module GitWiki
     set :app_file, __FILE__
     set :haml, { :format        => :html5,
                  :attr_wrapper  => '"'     }
-    use_in_file_templates!
+    enable :inline_templates
 
     error PageNotFound do
       page = request.env["sinatra.error"].name
