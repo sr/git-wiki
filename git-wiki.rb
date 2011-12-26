@@ -5,8 +5,8 @@ require "grit"
 require "rdiscount"
 require 'net/ssh'
 
-require "git_wiki/page_not_found"
-require "git_wiki/page"
+require_relative "./git_wiki/page_not_found"
+require_relative "./git_wiki/page"
 
 module GitWiki
   class << self
