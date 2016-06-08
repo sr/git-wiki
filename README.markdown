@@ -38,7 +38,7 @@ See also
   [Sinatra]: http://www.sinatrarb.com
   [GitHub]: http://github.com/sr/git-wiki
   [forks]: http://github.com/sr/git-wiki/network
-  [al3x]: http://github.com/al3x/gitwiki
+  [al3x]: http://github.com/al3x/git-wiki
   [gems]: http://www.rubygems.org/
   [mojombo-grit]: http://github.com/mojombo/grit
   [HAML]: http://haml.hamptoncatlin.com
